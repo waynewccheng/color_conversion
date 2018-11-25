@@ -1,6 +1,8 @@
-% 11-24-2018
+%% add sizex and sizey into reflectance.mat and rename to transmittance
+% for WSI truthing project
+% change name from reflectance to transmittance
+% 11-24-2018 Thanksgiving
 % 4-9-2018
-%% add sizex and sizey into the reflectance file for WSI truthing project
 
 function add_sizey_sizex (folder_name)
 
@@ -14,4 +16,5 @@ function add_sizey_sizex (folder_name)
     end
     
     save([folder_name '\reflectance.mat'],'sizey','sizex','-append')
+
 end

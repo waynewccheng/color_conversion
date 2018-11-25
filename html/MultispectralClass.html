@@ -1,0 +1,286 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>MultispectralClass</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2018-11-24"><meta name="DC.source" content="MultispectralClass.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Multispectral Imaging System processing</a></li></ul></div><pre class="codeinput"><span class="keyword">classdef</span> MultispectralClass
+</pre><h2>Multispectral Imaging System processing<a name="2"></a></h2><p>11-24-2018 Thanksgiving</p><pre class="codeinput">    properties
+        Property1
+    <span class="keyword">end</span>
+
+    methods
+
+        <span class="keyword">function</span> obj = MultispectralClass
+            <span class="comment">%UNTITLED3 Construct an instance of this class</span>
+            <span class="comment">%   Detailed explanation goes here</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> outputArg = method1(obj,inputArg)
+            <span class="comment">%METHOD1 Summary of this method goes here</span>
+            <span class="comment">%   Detailed explanation goes here</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">%</span>
+        <span class="comment">% 11-24-2018 into class</span>
+        <span class="comment">% cannot find white folder</span>
+        <span class="comment">% 7-30-2015</span>
+        <span class="comment">% convert frames (DDL) to reflectance by using reference white background</span>
+        <span class="comment">%</span>
+        <span class="keyword">function</span> [transmittance_array, sizey, sizex] = frame2reflectance_white (obj, foldername, foldername_white)
+
+            disp(<span class="string">'Combining frames into reflectance...'</span>)
+
+            fnin = sprintf(<span class="string">'%s/frame'</span>,foldername_white);
+            load(fnin,<span class="string">'vimarray'</span>);
+            vimarray0 = vimarray;
+
+            [sizewl sizey sizex] = size(vimarray0);
+
+            fnin = sprintf(<span class="string">'%s/frame'</span>,foldername);
+            load(fnin,<span class="string">'vimarray'</span>);
+
+            <span class="comment">% calculate the reflectance</span>
+            ddl_array = reshape(vimarray,sizewl,sizey*sizex);
+            ddl_white_array = reshape(vimarray0,sizewl,sizey*sizex);
+
+            transmittance_array = ddl_array ./ ddl_white_array;
+
+            transmittance_array = min(transmittance_array,1);
+
+            <span class="comment">% ----------------------------------</span>
+            <span class="keyword">return</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">%</span>
+        <span class="comment">% 11-24-2018</span>
+        <span class="comment">% D65</span>
+        <span class="comment">% 7-23-2015</span>
+        <span class="comment">% convert reflectance into RGB using D65</span>
+        <span class="comment">% usage: rgb = reflectance2D65(reflectance_array7);</span>
+        <span class="comment">%</span>
+        <span class="keyword">function</span> XYZ = reflectance2XYZ (obj, reflect_array, ls)
+
+            disp(<span class="string">'Combining reflectance and illuminant into XYZ...'</span>)
+
+            XYZxyz0 = obj.spd2XYZ(ls);
+            whiteY = XYZxyz0(2);
+
+            vector_length = size(reflect_array,2);
+            ls_array = repmat(ls,1,vector_length);
+            spd_array = reflect_array .* ls_array;
+
+            <span class="comment">% rescale to [0:1]</span>
+            <span class="comment">% define the white level here</span>
+            XYZ = obj.spd2XYZ(spd_array)/whiteY * 1;
+
+        <span class="keyword">end</span>
+
+        <span class="comment">%</span>
+        <span class="comment">%</span>
+        <span class="comment">%</span>
+        <span class="keyword">function</span> spd_array = reflectance2spd (obj, reflect_array, ls)
+
+            vector_length = size(reflect_array,2);
+            ls_array = repmat(ls,1,vector_length);
+            spd_array = reflect_array .* ls_array;
+
+        <span class="keyword">end</span>
+
+
+        <span class="comment">%</span>
+        <span class="comment">%Convert the old "reflectance.mat" to "transmittance.mat"</span>
+        <span class="comment">%</span>
+        <span class="keyword">function</span> convert_transmittance
+
+            load(<span class="string">'reflectance'</span>)
+            sizex = 3376
+            sizey = 2704
+            transmittance_array = reshape(reflectance_array,41,sizey,sizex);
+
+            save(<span class="string">'transmittance'</span>,<span class="string">'transmittance_array'</span>,<span class="string">'sizex'</span>,<span class="string">'sizey'</span>,<span class="string">'-v7.3'</span>)
+
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  MultispectralClass with properties:
+
+    Property1: []
+
+</pre><pre class="codeinput"><span class="keyword">end</span>
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+
+classdef MultispectralClass
+    
+    %% Multispectral Imaging System processing
+    % 11-24-2018 Thanksgiving
+    
+    properties
+        Property1
+    end
+    
+    methods
+        
+        function obj = MultispectralClass
+            %UNTITLED3 Construct an instance of this class
+            %   Detailed explanation goes here
+        end
+        
+        function outputArg = method1(obj,inputArg)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+        end
+        
+        % 
+        % 11-24-2018 into class
+        % cannot find white folder
+        % 7-30-2015
+        % convert frames (DDL) to reflectance by using reference white background
+        %
+        function [transmittance_array, sizey, sizex] = frame2reflectance_white (obj, foldername, foldername_white)
+            
+            disp('Combining frames into reflectance...')
+            
+            fnin = sprintf('%s/frame',foldername_white);
+            load(fnin,'vimarray');
+            vimarray0 = vimarray;
+            
+            [sizewl sizey sizex] = size(vimarray0);
+            
+            fnin = sprintf('%s/frame',foldername);
+            load(fnin,'vimarray');
+            
+            % calculate the reflectance
+            ddl_array = reshape(vimarray,sizewl,sizey*sizex);
+            ddl_white_array = reshape(vimarray0,sizewl,sizey*sizex);
+            
+            transmittance_array = ddl_array ./ ddl_white_array;
+            
+            transmittance_array = min(transmittance_array,1);
+            
+            % REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+            return
+        end
+        
+        % 
+        % 11-24-2018
+        % D65
+        % 7-23-2015
+        % convert reflectance into RGB using D65
+        % usage: rgb = reflectance2D65(reflectance_array7);
+        % 
+        function XYZ = reflectance2XYZ (obj, reflect_array, ls)
+            
+            disp('Combining reflectance and illuminant into XYZ...')
+            
+            XYZxyz0 = obj.spd2XYZ(ls);
+            whiteY = XYZxyz0(2);
+            
+            vector_length = size(reflect_array,2);
+            ls_array = repmat(ls,1,vector_length);
+            spd_array = reflect_array .* ls_array;
+            
+            % rescale to [0:1]
+            % define the white level here
+            XYZ = obj.spd2XYZ(spd_array)/whiteY * 1;
+            
+        end
+        
+        %
+        %
+        %
+        function spd_array = reflectance2spd (obj, reflect_array, ls)
+            
+            vector_length = size(reflect_array,2);
+            ls_array = repmat(ls,1,vector_length);
+            spd_array = reflect_array .* ls_array;
+            
+        end
+        
+        
+        %
+        %Convert the old "reflectance.mat" to "transmittance.mat"
+        % 
+        function convert_transmittance
+            
+            load('reflectance')
+            sizex = 3376
+            sizey = 2704
+            transmittance_array = reshape(reflectance_array,41,sizey,sizex);
+            
+            save('transmittance','transmittance_array','sizex','sizey','-v7.3')
+            
+        end
+        
+    end
+end
+
+
+##### SOURCE END #####
+--></body></html>

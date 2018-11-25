@@ -1,13 +1,15 @@
+
 classdef MultispectralClass
     
-    %UNTITLED3 Summary of this class goes here
-    %   Detailed explanation goes here
+    %% Multispectral Imaging System processing
+    % 11-24-2018 Thanksgiving
     
     properties
         Property1
     end
     
     methods
+        
         function obj = MultispectralClass
             %UNTITLED3 Construct an instance of this class
             %   Detailed explanation goes here
@@ -18,6 +20,7 @@ classdef MultispectralClass
             %   Detailed explanation goes here
         end
         
+        % 
         % 11-24-2018 into class
         % cannot find white folder
         % 7-30-2015
@@ -48,12 +51,13 @@ classdef MultispectralClass
             return
         end
         
+        % 
         % 11-24-2018
         % D65
         % 7-23-2015
         % convert reflectance into RGB using D65
         % usage: rgb = reflectance2D65(reflectance_array7);
-        
+        % 
         function XYZ = reflectance2XYZ (obj, reflect_array, ls)
             
             disp('Combining reflectance and illuminant into XYZ...')
@@ -71,16 +75,21 @@ classdef MultispectralClass
             
         end
         
+        %
+        %
+        %
         function spd_array = reflectance2spd (obj, reflect_array, ls)
             
             vector_length = size(reflect_array,2);
             ls_array = repmat(ls,1,vector_length);
             spd_array = reflect_array .* ls_array;
-           
-        end        
+            
+        end
         
         
-        % to convert the old format
+        %
+        %Convert the old "reflectance.mat" to "transmittance.mat"
+        % 
         function convert_transmittance
             
             load('reflectance')
