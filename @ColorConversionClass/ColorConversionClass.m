@@ -87,7 +87,7 @@ classdef ColorConversionClass
             
             % to fix data path
             % spec is a 401x2 matrix
-            load ('C:\Users\wcc\Documents\GitHub\color_conversion\datain/spec_cied65','spec');
+            load ('C:\Users\wcc\Documents\GitHub\color_conversion\@ColorConversionClass\datain/spec_cied65','spec');
             
             % reduce to 41x2
             ls_before_normalized = spec(1:10:401,2);

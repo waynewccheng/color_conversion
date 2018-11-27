@@ -11,13 +11,89 @@ classdef MultispectralClass
     methods (Static)
         
         function obj = MultispectralClass
-            %UNTITLED3 Construct an instance of this class
-            %   Detailed explanation goes here
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
+        %
+        % 4-12-2018: save cam.vid and cam.src in info.mat
+        % 4-10-2018: merge big and small
+        % 10-9-2015
+        % example: ol490 = OL490Class; camera2frame('dataout/1009-test1',1,ol490)
+        %
+        % 8-3-2015: hardware trigger; needs software reset!
+        % 7-23-2015: replace grasshopper function with camera_*
+        % usage: camera2frame('0723-7')
+        % 7-21-2015: revisit
+        % capture images with camera
+        % capture 41 images from 380 to 780
+        % output: vimarray(41,480,640)
+        %
+        function vimarray = camera2frame (pathout, numberofshots, ol490, big_or_small)
+            
+            disp('Capturing frames with wavelength from 380 to 780 nm...')
+            
+            
+            % aqusition
+            if big_or_small == 1
+                cam = CameraClass9MPBig
+            else
+                cam = CameraClass9MPSmall
+            end
+            
+            cam_vid = get(cam.vid)
+            cam_src = get(cam.src)
+            
+            %            mkdir(pathout)
+            %            fnout_info = sprintf('%s/info',pathout);
+            %            save(fnout_info,'cam_vid','cam_src','-append')
+            
+            % data
+            vimarray = zeros(41,cam.sizey,cam.sizex);
+            
+            
+            % prepare light
+            bandwidth = 10;
+            intensity = 100;
+            
+            % add some delay here because 380 nm has problems
+            ol490.setPeak(380,bandwidth,intensity);
+            pause(1)
+            
+            k = 1;
+            for wl=380:10:780
+                % prepare light
+                
+                ol490.setPeak(wl,bandwidth,intensity);
+                
+                % focus
+                %        f_opt = myfocus(cam)
+                
+                % need pause here???
+                % pause(0.25)
+                
+                % acqusition
+                vim = cam.snap(numberofshots);
+                vimarray(k,:,:) = vim;
+                
+                k = k + 1;
+            end
+            
+            % exit
+            cam.close;
+            
+            beep
+            
+            % save data after closing devices
+            %disp('Saving captured frames in vimarray...')
+            %save(fnout,'vimarray','-V7.3')
+            
+            ol490.setPeak(550,10,100)
+            
+            % ring
+            beep on
+            beep
+            
+            return
+            
         end
         
         %
@@ -26,18 +102,11 @@ classdef MultispectralClass
         % 7-30-2015
         % convert frames (DDL) to reflectance by using reference white background
         %
-        function [transmittance_array, sizey, sizex] = frame2reflectance_white (foldername, foldername_white)
+        function [transmittance_array, sizey, sizex] = frame2reflectance_white (vimarray, vimarray0)
             
             disp('Combining frames into reflectance...')
             
-            fnin = sprintf('%s/frame',foldername_white);
-            load(fnin,'vimarray');
-            vimarray0 = vimarray;
-            
             [sizewl sizey sizex] = size(vimarray0);
-            
-            fnin = sprintf('%s/frame',foldername);
-            load(fnin,'vimarray');
             
             % calculate the reflectance
             ddl_array = reshape(vimarray,sizewl,sizey*sizex);
@@ -45,6 +114,7 @@ classdef MultispectralClass
             
             transmittance_array = ddl_array ./ ddl_white_array;
             
+            % clip at 1
             transmittance_array = min(transmittance_array,1);
             
             % ----------------------------------
@@ -136,7 +206,7 @@ classdef MultispectralClass
                 dE00_single = zeros(1,n);
                 dE94_single = zeros(1,n);
                 dEab_single = zeros(1,n);
-                for i = 1:n 
+                for i = 1:n
                     [dE00_single(i) dE94_single(i) dEab_single(i)] = ColorConversionClass.LAB2dE(LAB_truth_1d(i,:)',LAB_mono_1d(i,:)');
                     dE00_sharma_single(i) = ColorConversionClass.deltaE2000_Sharma(LAB_truth_1d(i,:),LAB_mono_1d(i,:));
                 end
@@ -156,15 +226,8 @@ classdef MultispectralClass
         %
         %
         %
-        function workflow_monochrome (tissue_name, pathname_root)
+        function workflow_monochrome (pathname_truth, pathname_mono)
             
-            % tissue_name = 'colon';
-            % pathname_root = ['C:\Users\wcc\Documents\GitHub\wsi_color_truthing_data'];
-            
-            pathname_tissue = [pathname_root '\' tissue_name];
-            pathname_truth = [pathname_tissue '\truth'];
-            
-            pathname_mono = [pathname_tissue '\mono'];
             if exist(pathname_mono,'dir') ~= 7
                 mkdir(pathname_mono);
             end
@@ -204,14 +267,132 @@ classdef MultispectralClass
         %
         %
         %
-        function workflow_truth (tissue_name, pathname_root)
+        function acquire_frames (pathname_truth, ol490, big_or_small)
             
-            % tissue_name = 'colon';
-            % pathname_root = ['C:\Users\wcc\Documents\GitHub\wsi_color_truthing_data'];
+            tic
             
+            % load('config.mat','LUDL_PORT');
+            LUDL_PORT = 'COM14'
             
-            pathname_tissue = [pathname_root '\' tissue_name];
-            pathname_truth = [pathname_tissue '\truth'];
+            ludl = LudlClass(LUDL_PORT);
+            
+            %% Step 0: choose ROI and focus
+            
+            % 0: use new location; 1: use old location
+            if 0
+                
+                % determine the ROI locations for target and reference white
+                findroi()
+                
+                % save the ROI locations
+                if exist(pathname_truth,'dir') ~= 7
+                    mkdir(pathname_truth)
+                end
+                save([pathname_truth '\info.mat'],'xy','xy_white','z','z_white')
+                
+            else
+                
+                % shortcut: use the previously saved locations
+                load('info.mat','xy','xy_white','z','z_white')
+                
+            end
+            
+            %% Step 1: take frames
+            
+            if 1
+                
+                disp('Moving to the ROI')
+                ludl.setXY(xy)
+                ludl.setZ(z)
+                
+                disp('Getting frames for ROI')
+                vimarray = MultispectralClass.camera2frame(pathname_truth,1,ol490,big_or_small);
+                
+                disp('Moving to the reference white')
+                ludl.setXY(xy_white)
+                ludl.setZ(z_white)
+                
+                disp('Getting frames for white')
+                vimarray0 = MultispectralClass.camera2frame(pathname_truth,1,ol490,big_or_small);
+                
+                
+                ol490.setWhite      % recover the light to white
+                
+                ludl.setXY(xy)      % return to the ROI
+                ludl.setZ(z)
+                
+                ludl.close;
+                
+                
+                % save data after closing devices
+                disp('Saving captured frames in vimarray...')
+                
+                folderout = [pathname_truth '\120 frame'];
+                if exist(folderout,'dir') ~= 7
+                    mkdir(folderout);
+                end
+                save([folderout '\frame.mat'],'vimarray','-V7.3')
+                
+                folderout = [pathname_truth '\110 frame white'];
+                if exist(folderout,'dir') ~= 7
+                    mkdir(folderout);
+                end
+                save([folderout '\white.frame.mat'],'vimarray0','-V7.3')
+                
+            end
+            
+            %
+            % 4-10-2018
+            
+            % turn on the light
+            function findroi
+                
+                ol490.setWhite
+                
+                vid = videoinput('pointgrey', 1, 'F7_Mono8_844x676_Mode5');
+                src = getselectedsource(vid);
+                
+                vid.FramesPerTrigger = 1;
+                
+                preview(vid);
+                
+                a = input('Press Enter to save location of ROI:')
+                
+                xy = ludl.getXY
+                z = ludl.getZ
+                
+                
+                a = input('Press Enter to save location of white:')
+                
+                xy_white = ludl.getXY
+                z_white = ludl.getZ
+                
+                delete(vid)
+            end
+            
+        end
+        
+        %
+        %
+        %
+        function workflow_truth (pathname_truth)
+            
+            if 1
+                %% frame in
+                folderin = [pathname_truth '\110 frame white']
+                load([folderin '\white.frame.mat'],'vimarray0')
+                
+                folderin = [pathname_truth '\120 frame'];
+                load([folderin '\frame.mat'],'vimarray')
+                
+                [transmittance_array, sizey, sizex] = MultispectralClass.frame2reflectance_white(vimarray, vimarray0);
+                
+                folderout = [pathname_truth '\220 transmittance'];
+                if exist(folderout,'dir') ~= 7
+                    mkdir(folderout);
+                end
+                save([folderout '\transmittance.mat'],'transmittance_array','sizex','sizey','-V7.3')
+            end
             
             if 1
                 %% light source in
