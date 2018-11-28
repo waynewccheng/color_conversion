@@ -85,9 +85,11 @@ classdef ColorConversionClass
         %
         function ls = spd_d65 ()
             
-            % to fix data path
+            % to fix data path            
+            [folder, name, ext] = fileparts(which('ColorConversionClass'));
+     
             % spec is a 401x2 matrix
-            load ('C:\Users\wcc\Documents\GitHub\color_conversion\@ColorConversionClass\datain/spec_cied65','spec');
+            load ([folder '/datain/spec_cied65'],'spec');
             
             % reduce to 41x2
             ls_before_normalized = spec(1:10:401,2);

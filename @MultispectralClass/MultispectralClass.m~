@@ -119,80 +119,19 @@ if 0
              transmittance_array(~mask) = ddl_array(~mask) ./ ddl_white_array(~mask);
 end
     
-if 0
+if 1
     mask_bxw = ddl_black_array <= ddl_array & ddl_array <= ddl_white_array;
     mask_bwx = ddl_black_array <= ddl_white_array & ddl_white_array <= ddl_array;
     mask_xbw = ddl_array <= ddl_black_array & ddl_black_array <= ddl_white_array;
     mask_xwb = ddl_array <= ddl_white_array & ddl_white_array <= ddl_black_array;
-    mask_wbx = ddl_white_array <= ddl_black_array & ddl_black_array <= ddl_array;
+    mask_wxb = ddl_white_array <= ddl_array & ddl_array <= ddl_black_array;
     mask_wxb = ddl_white_array <= ddl_array & ddl_array <= ddl_black_array;
 end
 
-if 1
-    mask_bxw = ddl_black_array < ddl_array & ddl_array < ddl_white_array;
-    mask_bwx = ddl_black_array < ddl_white_array & ddl_white_array < ddl_array;
-    mask_xbw = ddl_array < ddl_black_array & ddl_black_array < ddl_white_array;
-    mask_xwb = ddl_array < ddl_white_array & ddl_white_array < ddl_black_array;
-    mask_wbx = ddl_white_array < ddl_black_array & ddl_black_array < ddl_array;
-    mask_wxb = ddl_white_array < ddl_array & ddl_array < ddl_black_array;
-end
-
-order_stat = zeros(6,41);
-for i = 1:41
-    order_stat(1,i) = nnz(mask_bxw(i,:));
-    order_stat(2,i) = nnz(mask_bwx(i,:));
-    order_stat(3,i) = nnz(mask_xbw(i,:));
-    order_stat(4,i) = nnz(mask_xwb(i,:));
-    order_stat(5,i) = nnz(mask_wbx(i,:));    
-    order_stat(6,i) = nnz(mask_wxb(i,:));
-end
-
-order_stat = order_stat / size(ddl_array,2);
-
-clf
-bar(order_stat','stacked')
-legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-
-figure
-clf
-
-subplot(1,3,1)
-hold on
-plot(order_stat(1,:),'r-')
-plot(order_stat(2,:),'r:')
-plot(order_stat(3,:),'g-')
-plot(order_stat(4,:),'g:')
-plot(order_stat(5,:),'b-')
-plot(order_stat(6,:),'b:')
-axis([1 41 0 1])
-legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-
-subplot(1,3,2)
-hold on
-plot(order_stat(1,:),'r-')
-plot(order_stat(2,:),'r:')
-plot(order_stat(3,:),'g-')
-plot(order_stat(4,:),'g:')
-plot(order_stat(5,:),'b-')
-plot(order_stat(6,:),'b:')
-axis([1 3 0 0.01])
-legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-
-subplot(1,3,3)
-hold on
-plot(order_stat(1,:),'r-')
-plot(order_stat(2,:),'r:')
-plot(order_stat(3,:),'g-')
-plot(order_stat(4,:),'g:')
-plot(order_stat(5,:),'b-')
-plot(order_stat(6,:),'b:')
-axis([41-2 41 0 0.01])
-legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-
+    
 if 1
             transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
 
-            % TBD
             threshold = 150;
             
             mask_greater_than_white = (ddl_array >= ddl_white_array) & ((ddl_white_array - ddl_black_array) > threshold);
@@ -205,7 +144,6 @@ if 1
             transmittance_array(mask_dynamic_range_too_small) = 0;
             
 end
-
 if 0
             % ----------------------------------
             % clip at 1 => not a good solution !!!
@@ -293,12 +231,12 @@ end
                 if exist(pathname_truth,'dir') ~= 7
                     mkdir(pathname_truth)
                 end
-                save([pathname_truth '/info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
+                save([pathname_truth '\info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
                 
             else
                 
                 % shortcut: use the previously saved locations
-                load([pathname_truth '/info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
+                load([pathname_truth '\info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
                 
             end
             
@@ -342,44 +280,44 @@ end
                 disp('Saving captured frames in vimarray...')
                 
                 tic
-                folderout = [pathname_truth '/120 frame'];
+                folderout = [pathname_truth '\120 frame'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
                 
                 var_size = whos('vimarray');
                 if var_size.bytes > 2*1000*1000*1000
-                    save([folderout '/frame.mat'],'vimarray','-v7.3','-nocompression')
+                    save([folderout '\frame.mat'],'vimarray','-v7.3','-nocompression')
                 else
-                    save([folderout '/frame.mat'],'vimarray')
+                    save([folderout '\frame.mat'],'vimarray')
                 end
                 toc
                 
                 tic
-                folderout = [pathname_truth '/110 frame white'];
+                folderout = [pathname_truth '\110 frame white'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
                 
                 var_size = whos('vimarray_white');
                 if var_size.bytes > 2*1000*1000*1000
-                    save([folderout '/white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
+                    save([folderout '\white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
                 else
-                    save([folderout '/white.frame.mat'],'vimarray_white')
+                    save([folderout '\white.frame.mat'],'vimarray_white')
                 end
                 toc
 
                 tic
-                folderout = [pathname_truth '/100 frame black'];
+                folderout = [pathname_truth '\100 frame black'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
                 
                 var_size = whos('vimarray_black');
                 if var_size.bytes > 2*1000*1000*1000
-                    save([folderout '/black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
+                    save([folderout '\black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
                 else
-                    save([folderout '/black.frame.mat'],'vimarray_black')
+                    save([folderout '\black.frame.mat'],'vimarray_black')
                 end
                 toc                
                 
@@ -433,7 +371,7 @@ end
         %
         function frame2plot (foldername, filename, varname)
             
-            load([foldername '/' filename],varname)
+            load([foldername '\' filename],varname)
             
             sizey = size(eval(varname),2);
             sizex = size(eval(varname),3);
@@ -481,8 +419,8 @@ end
             end
             
             % save the image
-            saveas(h1,[foldername '/frames41.png'])
-            savefig(h1,[foldername '/frames41'])  % the png is awful
+            saveas(h1,[foldername '\frames41.png'])
+            savefig(h1,[foldername '\frames41'])  % the png is awful
         end
         
         
@@ -491,7 +429,7 @@ end
         %
         function frame2boxplot (foldername, filename, varname)
             
-            filepath = [foldername '/' filename];
+            filepath = [foldername '\' filename];
             load(filepath,varname)
             
             sizey = size(eval(varname),2);
@@ -510,7 +448,7 @@ end
             boxplot(vimarray_1d')
             
             % save the image
-            saveas(h1,[foldername '/boxplot.png'])
+            saveas(h1,[foldername '\boxplot.png'])
         end
         
         
@@ -546,13 +484,13 @@ end
         %
         function workflow_acquire_sanity_check (pathname_truth)
             
-            if 1
-                MultispectralClass.frame2boxplot([pathname_truth '/120 frame'],'frame.mat','vimarray')
-                MultispectralClass.frame2boxplot([pathname_truth '/110 frame white'],'white.frame.mat','vimarray_white')
-                MultispectralClass.frame2boxplot([pathname_truth '/100 frame black'],'black.frame.mat','vimarray_black')
-                MultispectralClass.frame2plot([pathname_truth '/120 frame'],'frame.mat','vimarray')
-                MultispectralClass.frame2plot([pathname_truth '/110 frame white'],'white.frame.mat','vimarray_white')
-                MultispectralClass.frame2plot([pathname_truth '/100 frame black'],'black.frame.mat','vimarray_black')
+            if 0
+                MultispectralClass.frame2boxplot([pathname_truth '\120 frame'],'frame.mat','vimarray')
+                MultispectralClass.frame2boxplot([pathname_truth '\110 frame white'],'white.frame.mat','vimarray_white')
+                MultispectralClass.frame2boxplot([pathname_truth '\100 frame black'],'black.frame.mat','vimarray_black')
+                MultispectralClass.frame2plot([pathname_truth '\120 frame'],'frame.mat','vimarray')
+                MultispectralClass.frame2plot([pathname_truth '\110 frame white'],'white.frame.mat','vimarray_white')
+                MultispectralClass.frame2plot([pathname_truth '\100 frame black'],'black.frame.mat','vimarray_black')
             end
             
             MultispectralClass.transmittance2boxplot(pathname_truth)
@@ -601,28 +539,28 @@ end
             if 1
                 %% light source in
                 ls = ColorConversionClass.spd_d65;
-                folderout = [pathname_truth '/200 d65'];
+                folderout = [pathname_truth '\200 d65'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '/d65.SPD.mat'],'ls')
+                save([folderout '\d65.SPD.mat'],'ls')
             end
             
             if 1
                 %% light source out
                 XYZn = ColorConversionClass.spd2XYZ(ColorConversionClass.spd_d65());
-                folderout = [pathname_truth '/400 CIEXYZ d65'];
+                folderout = [pathname_truth '\400 CIEXYZ d65'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '/d65.XYZ.mat'],'XYZn')
+                save([folderout '\d65.XYZ.mat'],'XYZn')
             end
             
             if 1
                 %% transmittance in
                 ls = ColorConversionClass.spd_d65();
-                folderin = [pathname_truth '/220 transmittance'];
-                load([folderin '/transmittance.mat'],'transmittance_array','sizex','sizey')
+                folderin = [pathname_truth '\220 transmittance'];
+                load([folderin '\transmittance.mat'],'transmittance_array','sizex','sizey')
                 transmittance_array_1d = reshape(transmittance_array,41,sizey*sizex);
             end
             
@@ -631,11 +569,11 @@ end
                 spd_array_1d = MultispectralClass.transmittance2spd(transmittance_array_1d, ls);
                 spd_array = reshape(spd_array_1d,41,sizey,sizex);
                 
-                folderout = [pathname_truth '/320 SPD'];
+                folderout = [pathname_truth '\320 SPD'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '/SPD.mat'],'spd_array','sizex','sizey','-v7.3')
+                save([folderout '\SPD.mat'],'spd_array','sizex','sizey','-v7.3')
             end
             
             if 1
@@ -643,11 +581,11 @@ end
                 XYZ_1d = ColorConversionClass.spd2XYZ(spd_array_1d);
                 XYZ = reshape(XYZ_1d,sizey,sizex,3);
                 
-                folderout = [pathname_truth '/420 CIEXYZ'];
+                folderout = [pathname_truth '\420 CIEXYZ'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '/XYZ.mat'],'XYZ','sizex','sizey','-v7.3')
+                save([folderout '\XYZ.mat'],'XYZ','sizex','sizey','-v7.3')
             end
             
             if 1
@@ -655,28 +593,28 @@ end
                 LAB_1d = ColorConversionClass.XYZ2lab(XYZ_1d,XYZn);
                 LAB = reshape(LAB_1d,sizey,sizex,3);
                 
-                folderout = [pathname_truth '/520 CIELAB'];
+                folderout = [pathname_truth '\520 CIELAB'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '/LAB.mat'],'LAB','sizex','sizey','-v7.3')
+                save([folderout '\LAB.mat'],'LAB','sizex','sizey','-v7.3')
             end
             
             if 1
                 %% sRGB out
-                folderin = [pathname_truth '/420 CIEXYZ'];
-                load([folderin '/XYZ.mat'],'XYZ','sizex','sizey')
+                folderin = [pathname_truth '\420 CIEXYZ'];
+                load([folderin '\XYZ.mat'],'XYZ','sizex','sizey')
                 XYZ_1d = reshape(XYZ,sizey*sizex,3);
                 sRGB_1d = ColorConversionClass.XYZ2sRGB(XYZ_1d);
                 sRGB = reshape(sRGB_1d,sizey,sizex,3);
                 
-                folderout = [pathname_truth '/900 sRGB'];
+                folderout = [pathname_truth '\900 sRGB'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '/sRGB.mat'],'sRGB','sizex','sizey','-v7.3')
+                save([folderout '\sRGB.mat'],'sRGB','sizex','sizey','-v7.3')
                 
-                imwrite(sRGB,[folderout '/truth.tif'])
+                imwrite(sRGB,[folderout '\truth.tif'])
             end
             
             
@@ -693,34 +631,34 @@ end
             end
             
             %% LAB in
-            folderin = [pathname_truth '/520 CIELAB'];
-            load([folderin '/LAB.mat'],'LAB','sizex','sizey')
+            folderin = [pathname_truth '\520 CIELAB'];
+            load([folderin '\LAB.mat'],'LAB','sizex','sizey')
             
             LAB_mono = MultispectralClass.LAB2monochrome(LAB);
             
             %% LAB out
-            folderout = [pathname_mono '/500 CIELAB'];
+            folderout = [pathname_mono '\500 CIELAB'];
             if exist(folderout,'dir') ~= 7
                 mkdir(folderout);
             end
-            save([folderout '/LAB.mat'],'LAB_mono','sizex','sizey','-v7.3')
+            save([folderout '\LAB.mat'],'LAB_mono','sizex','sizey','-v7.3')
             
             %% sRGB out
-            folderout = [pathname_mono '/500 CIELAB'];
-            load([folderout '/LAB.mat'],'LAB_mono','sizex','sizey')
+            folderout = [pathname_mono '\500 CIELAB'];
+            load([folderout '\LAB.mat'],'LAB_mono','sizex','sizey')
             
             %
             % use Matlab lab2rgb() instead of my XYZ2sRGB
             %
             sRGB = lab2rgb(LAB_mono,'ColorSpace','srgb','WhitePoint','d65');
             
-            folderout = [pathname_mono '/900 sRGB'];
+            folderout = [pathname_mono '\900 sRGB'];
             if exist(folderout,'dir') ~= 7
                 mkdir(folderout);
             end
             
-            save([folderout '/sRGB.mat'],'sRGB','sizex','sizey','-v7.3')
-            imwrite(sRGB,[folderout '/monochrome.tif'])
+            save([folderout '\sRGB.mat'],'sRGB','sizex','sizey','-v7.3')
+            imwrite(sRGB,[folderout '\monochrome.tif'])
             
         end
         
@@ -728,24 +666,24 @@ end
         %
         %
         function workflow_dE (tissue_name, pathname_root)
-            pathname_tissue = [pathname_root '/' tissue_name];
-            pathname_truth = [pathname_tissue '/truth'];
-            pathname_mono = [pathname_tissue '/mono'];
+            pathname_tissue = [pathname_root '\' tissue_name];
+            pathname_truth = [pathname_tissue '\truth'];
+            pathname_mono = [pathname_tissue '\mono'];
             
-            pathname_dE = [pathname_tissue '/dE'];
+            pathname_dE = [pathname_tissue '\dE'];
             if exist(pathname_dE,'dir') ~= 7
                 mkdir(pathname_dE);
             end
             
             %% LAB_truth in
-            folderin = [pathname_truth '/520 CIELAB'];
-            load([folderin '/LAB.mat'],'LAB','sizex','sizey')
+            folderin = [pathname_truth '\520 CIELAB'];
+            load([folderin '\LAB.mat'],'LAB','sizex','sizey')
             LAB_truth = LAB;
             LAB_truth_1d = reshape(LAB_truth,sizey*sizex,3);
             
             %% LAB_mono in
-            folderin = [pathname_mono '/500 CIELAB'];
-            load([folderin '/LAB.mat'],'LAB_mono','sizex','sizey')
+            folderin = [pathname_mono '\500 CIELAB'];
+            load([folderin '\LAB.mat'],'LAB_mono','sizex','sizey')
             LAB_mono_1d = reshape(LAB_mono,sizey*sizex,3);
             
             %% dE
