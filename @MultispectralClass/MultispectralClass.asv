@@ -107,18 +107,11 @@ classdef MultispectralClass
             ddl_white_array = reshape(vimarray_white,sizewl,sizey*sizex);
             ddl_black_array = reshape(vimarray_black,sizewl,sizey*sizex);
             
-            % analyze the frame
-            analyze_frame('order_stat_before');
-            
-            % condition the frames
-            
-            %  analyze the frame
-            analyze_frame('order_stat_after');
+            analyze_frame();
+    
 
-            % calculate the transmittance
             transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
 
-            
             %% Condition the transmittance
 if 1
             % TBD
@@ -141,84 +134,82 @@ else
             transmittance_array = max(transmittance_array,0);
 end
 
+
             return
 
-            %
-            % 
-            % 
-            function analyze_frame (fn)
-                
-                if 1
-                    mask_bxw = ddl_black_array <= ddl_array & ddl_array <= ddl_white_array;
-                    mask_bwx = ddl_black_array <= ddl_white_array & ddl_white_array <= ddl_array;
-                    mask_xbw = ddl_array <= ddl_black_array & ddl_black_array <= ddl_white_array;
-                    mask_xwb = ddl_array <= ddl_white_array & ddl_white_array <= ddl_black_array;
-                    mask_wbx = ddl_white_array <= ddl_black_array & ddl_black_array <= ddl_array;
-                    mask_wxb = ddl_white_array <= ddl_array & ddl_array <= ddl_black_array;
-                else
-                    mask_bxw = ddl_black_array < ddl_array & ddl_array < ddl_white_array;
-                    mask_bwx = ddl_black_array < ddl_white_array & ddl_white_array < ddl_array;
-                    mask_xbw = ddl_array < ddl_black_array & ddl_black_array < ddl_white_array;
-                    mask_xwb = ddl_array < ddl_white_array & ddl_white_array < ddl_black_array;
-                    mask_wbx = ddl_white_array < ddl_black_array & ddl_black_array < ddl_array;
-                    mask_wxb = ddl_white_array < ddl_array & ddl_array < ddl_black_array;
-                end
-                
-                order_stat = zeros(6,41);
-                for i = 1:41
-                    order_stat(1,i) = nnz(mask_bxw(i,:));
-                    order_stat(2,i) = nnz(mask_bwx(i,:));
-                    order_stat(3,i) = nnz(mask_xbw(i,:));
-                    order_stat(4,i) = nnz(mask_xwb(i,:));
-                    order_stat(5,i) = nnz(mask_wbx(i,:));
-                    order_stat(6,i) = nnz(mask_wxb(i,:));
-                end
-                
-                order_stat = order_stat / size(ddl_array,2);
+            function analyze_frame
+            if 0
+    mask_bxw = ddl_black_array <= ddl_array & ddl_array <= ddl_white_array;
+    mask_bwx = ddl_black_array <= ddl_white_array & ddl_white_array <= ddl_array;
+    mask_xbw = ddl_array <= ddl_black_array & ddl_black_array <= ddl_white_array;
+    mask_xwb = ddl_array <= ddl_white_array & ddl_white_array <= ddl_black_array;
+    mask_wbx = ddl_white_array <= ddl_black_array & ddl_black_array <= ddl_array;
+    mask_wxb = ddl_white_array <= ddl_array & ddl_array <= ddl_black_array;
+end
 
-                save(fn,'order_stat')
-                
-                % visualization
-                clf
-                subplot(2,2,4)
-                bar(order_stat','stacked')
-                legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-                
-                subplot(2,2,1)
-                hold on
-                plot(order_stat(1,:),'r-')
-                plot(order_stat(2,:),'r:')
-                plot(order_stat(3,:),'g-')
-                plot(order_stat(4,:),'g:')
-                plot(order_stat(5,:),'b-')
-                plot(order_stat(6,:),'b:')
-                axis([1 41 0 1])
-                legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-                
-                subplot(2,2,2)
-                hold on
-                plot(order_stat(1,:),'r-')
-                plot(order_stat(2,:),'r:')
-                plot(order_stat(3,:),'g-')
-                plot(order_stat(4,:),'g:')
-                plot(order_stat(5,:),'b-')
-                plot(order_stat(6,:),'b:')
-                axis([1 3 0 0.01])
-                legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-                
-                subplot(2,2,3)
-                hold on
-                plot(order_stat(1,:),'r-')
-                plot(order_stat(2,:),'r:')
-                plot(order_stat(3,:),'g-')
-                plot(order_stat(4,:),'g:')
-                plot(order_stat(5,:),'b-')
-                plot(order_stat(6,:),'b:')
-                axis([41-2 41 0 0.01])
-                legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
-                
+if 1
+    mask_bxw = ddl_black_array < ddl_array & ddl_array < ddl_white_array;
+    mask_bwx = ddl_black_array < ddl_white_array & ddl_white_array < ddl_array;
+    mask_xbw = ddl_array < ddl_black_array & ddl_black_array < ddl_white_array;
+    mask_xwb = ddl_array < ddl_white_array & ddl_white_array < ddl_black_array;
+    mask_wbx = ddl_white_array < ddl_black_array & ddl_black_array < ddl_array;
+    mask_wxb = ddl_white_array < ddl_array & ddl_array < ddl_black_array;
+end
+
+order_stat = zeros(6,41);
+for i = 1:41
+    order_stat(1,i) = nnz(mask_bxw(i,:));
+    order_stat(2,i) = nnz(mask_bwx(i,:));
+    order_stat(3,i) = nnz(mask_xbw(i,:));
+    order_stat(4,i) = nnz(mask_xwb(i,:));
+    order_stat(5,i) = nnz(mask_wbx(i,:));    
+    order_stat(6,i) = nnz(mask_wxb(i,:));
+end
+
+order_stat = order_stat / size(ddl_array,2);
+
+clf
+bar(order_stat','stacked')
+legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
+
+figure
+clf
+
+subplot(1,3,1)
+hold on
+plot(order_stat(1,:),'r-')
+plot(order_stat(2,:),'r:')
+plot(order_stat(3,:),'g-')
+plot(order_stat(4,:),'g:')
+plot(order_stat(5,:),'b-')
+plot(order_stat(6,:),'b:')
+axis([1 41 0 1])
+legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
+
+subplot(1,3,2)
+hold on
+plot(order_stat(1,:),'r-')
+plot(order_stat(2,:),'r:')
+plot(order_stat(3,:),'g-')
+plot(order_stat(4,:),'g:')
+plot(order_stat(5,:),'b-')
+plot(order_stat(6,:),'b:')
+axis([1 3 0 0.01])
+legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
+
+subplot(1,3,3)
+hold on
+plot(order_stat(1,:),'r-')
+plot(order_stat(2,:),'r:')
+plot(order_stat(3,:),'g-')
+plot(order_stat(4,:),'g:')
+plot(order_stat(5,:),'b-')
+plot(order_stat(6,:),'b:')
+axis([41-2 41 0 0.01])
+legend('bxw','bwx','xbw','xwb','wbx','wxb','Location','best')
+
             end
-            
+        
         end
         
         
