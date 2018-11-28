@@ -5,7 +5,6 @@ classdef MultispectralClass
     % 11-24-2018 Thanksgiving
     
     properties
-        Property1
     end
     
     methods (Static)
@@ -80,11 +79,6 @@ classdef MultispectralClass
             % exit
             cam.close;
             
-            beep
-            
-            % save data after closing devices
-            %disp('Saving captured frames in vimarray...')
-            %save(fnout,'vimarray','-V7.3')
             
             ol490.setPeak(550,10,100)
             
@@ -100,26 +94,58 @@ classdef MultispectralClass
         % 11-24-2018 into class
         % cannot find white folder
         % 7-30-2015
-        % convert frames (DDL) to reflectance by using reference white background
+        % convert frames (DDL) to transmittance by using reference white background
         %
-        function [transmittance_array, sizey, sizex] = frame2reflectance_white (vimarray, vimarray0)
+        function [transmittance_array, sizey, sizex] = frame2transmittance_white_black (vimarray, vimarray_white, vimarray_black)
             
-            disp('Combining frames into reflectance...')
+            disp('Combining frames into transmittance...')
             
-            [sizewl sizey sizex] = size(vimarray0);
+            [sizewl sizey sizex] = size(vimarray_white);
             
-            % calculate the reflectance
+            % calculate the transmittance
             ddl_array = reshape(vimarray,sizewl,sizey*sizex);
-            ddl_white_array = reshape(vimarray0,sizewl,sizey*sizex);
+            ddl_white_array = reshape(vimarray_white,sizewl,sizey*sizex);
+            ddl_black_array = reshape(vimarray_black,sizewl,sizey*sizex);
             
-            transmittance_array = ddl_array ./ ddl_white_array;
+if 0            
+            % set the transmittance as 0 if the reference white is too dark
+            threshold = 300;
             
-            % clip at 1
-            transmittance_array = min(transmittance_array,1);
+             mask = (ddl_white_array - ddl_black_array) <= threshold |...
+             ddl_white_array < threshold |...
+             ddl_array < ddl_black_array;
+                 
+             transmittance_array(mask) = 0;
+             transmittance_array(~mask) = ddl_array(~mask) ./ ddl_white_array(~mask);
+    end
+    
+if 1
+            transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
+
+            threshold = 150;
             
+            mask_greater_than_white = (ddl_array >= ddl_white_array) & ((ddl_white_array - ddl_black_array) > threshold);
+            transmittance_array(mask_greater_than_white) = 1;
+
+            mask_less_than_black = (ddl_array <= ddl_black_array) & ((ddl_white_array - ddl_black_array) > threshold);
+            transmittance_array(mask_less_than_black) = 0;
+
+            mask_dynamic_range_too_small = (ddl_white_array - ddl_black_array) < threshold;
+            transmittance_array(mask_dynamic_range_too_small) = 0;
+            
+end
+if 0
             % ----------------------------------
+            % clip at 1 => not a good solution !!!
+            transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
+            transmittance_array = min(transmittance_array,1);
+            transmittance_array = max(transmittance_array,0);
+end
+
+
             return
         end
+        
         
         %
         % 11-24-2018
@@ -170,99 +196,6 @@ classdef MultispectralClass
             LAB_mono(:,:,3) = 0;          % set b* = 0
         end
         
-        %
-        %
-        %
-        function workflow_dE (tissue_name, pathname_root)
-            pathname_tissue = [pathname_root '\' tissue_name];
-            pathname_truth = [pathname_tissue '\truth'];
-            pathname_mono = [pathname_tissue '\mono'];
-            
-            pathname_dE = [pathname_tissue '\dE'];
-            if exist(pathname_dE,'dir') ~= 7
-                mkdir(pathname_dE);
-            end
-            
-            %% LAB_truth in
-            folderin = [pathname_truth '\520 CIELAB'];
-            load([folderin '\LAB.mat'],'LAB','sizex','sizey')
-            LAB_truth = LAB;
-            LAB_truth_1d = reshape(LAB_truth,sizey*sizex,3);
-            
-            %% LAB_mono in
-            folderin = [pathname_mono '\500 CIELAB'];
-            load([folderin '\LAB.mat'],'LAB_mono','sizex','sizey')
-            LAB_mono_1d = reshape(LAB_mono,sizey*sizex,3);
-            
-            %% dE
-            [dE00_1d dE94_1d dEab_1d] = ColorConversionClass.LAB2dE(LAB_truth_1d',LAB_mono_1d');
-            dE00 = reshape(dE00_1d,sizey,sizex);
-            dE94 = reshape(dE94_1d,sizey,sizex);
-            dEab = reshape(dEab_1d,sizey,sizex);
-            
-            if 0
-                %% verify with Sharma's code
-                n = sizex * sizey;
-                dE00_single = zeros(1,n);
-                dE94_single = zeros(1,n);
-                dEab_single = zeros(1,n);
-                for i = 1:n
-                    [dE00_single(i) dE94_single(i) dEab_single(i)] = ColorConversionClass.LAB2dE(LAB_truth_1d(i,:)',LAB_mono_1d(i,:)');
-                    dE00_sharma_single(i) = ColorConversionClass.deltaE2000_Sharma(LAB_truth_1d(i,:),LAB_mono_1d(i,:));
-                end
-                
-                boxplot([dE00_sharma_single' dE00_single' dE94_single' dEab_single' dE00_1d' dE94_1d' dEab_1d'],...
-                    {'dE00 Sharma','dE00 single','dE94 single','dEab single','dE00 vector','dE94 vector','dEab vector'})
-                
-            end
-            
-            
-            %% dE out
-            save([pathname_dE '\dE.mat'],'dEab','dE94','dE00','sizex','sizey','-v7.3')
-            
-        end
-        
-        
-        %
-        %
-        %
-        function workflow_monochrome (pathname_truth, pathname_mono)
-            
-            if exist(pathname_mono,'dir') ~= 7
-                mkdir(pathname_mono);
-            end
-            
-            %% LAB in
-            folderin = [pathname_truth '\520 CIELAB'];
-            load([folderin '\LAB.mat'],'LAB','sizex','sizey')
-            
-            LAB_mono = MultispectralClass.LAB2monochrome(LAB);
-            
-            %% LAB out
-            folderout = [pathname_mono '\500 CIELAB'];
-            if exist(folderout,'dir') ~= 7
-                mkdir(folderout);
-            end
-            save([folderout '\LAB.mat'],'LAB_mono','sizex','sizey','-v7.3')
-            
-            %% sRGB out
-            folderout = [pathname_mono '\500 CIELAB'];
-            load([folderout '\LAB.mat'],'LAB_mono','sizex','sizey')
-            
-            %
-            % use Matlab lab2rgb() instead of my XYZ2sRGB
-            %
-            sRGB = lab2rgb(LAB_mono,'ColorSpace','srgb','WhitePoint','d65');
-            
-            folderout = [pathname_mono '\900 sRGB'];
-            if exist(folderout,'dir') ~= 7
-                mkdir(folderout);
-            end
-            
-            save([folderout '\sRGB.mat'],'sRGB','sizex','sizey','-v7.3')
-            imwrite(sRGB,[folderout '\monochrome.tif'])
-            
-        end
         
         %
         %
@@ -288,12 +221,12 @@ classdef MultispectralClass
                 if exist(pathname_truth,'dir') ~= 7
                     mkdir(pathname_truth)
                 end
-                save([pathname_truth '\info.mat'],'xy','xy_white','z','z_white')
+                save([pathname_truth '\info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
                 
             else
                 
                 % shortcut: use the previously saved locations
-                load('info.mat','xy','xy_white','z','z_white')
+                load([pathname_truth '\info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
                 
             end
             
@@ -301,19 +234,28 @@ classdef MultispectralClass
             
             if 1
                 
+                n_times = 10;
+                
                 disp('Moving to the ROI')
                 ludl.setXY(xy)
                 ludl.setZ(z)
                 
                 disp('Getting frames for ROI')
-                vimarray = MultispectralClass.camera2frame(pathname_truth,1,ol490,big_or_small);
+                vimarray = MultispectralClass.camera2frame(pathname_truth,n_times,ol490,big_or_small);
                 
                 disp('Moving to the reference white')
                 ludl.setXY(xy_white)
                 ludl.setZ(z_white)
                 
                 disp('Getting frames for white')
-                vimarray0 = MultispectralClass.camera2frame(pathname_truth,1,ol490,big_or_small);
+                vimarray_white = MultispectralClass.camera2frame(pathname_truth,n_times,ol490,big_or_small);
+
+                disp('Moving to the reference black')
+                ludl.setXY(xy_black)
+                ludl.setZ(z_black)
+                
+                disp('Getting frames for black')
+                vimarray_black = MultispectralClass.camera2frame(pathname_truth,n_times,ol490,big_or_small);
                 
                 
                 ol490.setWhite      % recover the light to white
@@ -327,26 +269,58 @@ classdef MultispectralClass
                 % save data after closing devices
                 disp('Saving captured frames in vimarray...')
                 
+                tic
                 folderout = [pathname_truth '\120 frame'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '\frame.mat'],'vimarray','-V7.3')
                 
+                var_size = whos('vimarray');
+                if var_size.bytes > 2*1000*1000*1000
+                    save([folderout '\frame.mat'],'vimarray','-v7.3','-nocompression')
+                else
+                    save([folderout '\frame.mat'],'vimarray')
+                end
+                toc
+                
+                tic
                 folderout = [pathname_truth '\110 frame white'];
                 if exist(folderout,'dir') ~= 7
                     mkdir(folderout);
                 end
-                save([folderout '\white.frame.mat'],'vimarray0','-V7.3')
+                
+                var_size = whos('vimarray_white');
+                if var_size.bytes > 2*1000*1000*1000
+                    save([folderout '\white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
+                else
+                    save([folderout '\white.frame.mat'],'vimarray_white')
+                end
+                toc
+
+                tic
+                folderout = [pathname_truth '\100 frame black'];
+                if exist(folderout,'dir') ~= 7
+                    mkdir(folderout);
+                end
+                
+                var_size = whos('vimarray_black');
+                if var_size.bytes > 2*1000*1000*1000
+                    save([folderout '\black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
+                else
+                    save([folderout '\black.frame.mat'],'vimarray_black')
+                end
+                toc                
+                
+                return
                 
             end
             
             %
             % 4-10-2018
-            
-            % turn on the light
+            %
             function findroi
                 
+                % turn on the light
                 ol490.setWhite
                 
                 vid = videoinput('pointgrey', 1, 'F7_Mono8_844x676_Mode5');
@@ -357,35 +331,186 @@ classdef MultispectralClass
                 preview(vid);
                 
                 a = input('Press Enter to save location of ROI:')
-                
                 xy = ludl.getXY
                 z = ludl.getZ
                 
                 
                 a = input('Press Enter to save location of white:')
-                
                 xy_white = ludl.getXY
                 z_white = ludl.getZ
                 
+                a = input('Press Enter to save location of black:')
+                xy_black = ludl.getXY
+                z_black = ludl.getZ
+                
                 delete(vid)
+                
             end
             
         end
         
+        %% Show images of 41 bands in subplots
         %
+        % Q: Is the light field uniform?
         %
+        % filename: .mat, use fullname including path and extension
+        % varname: vimarray or vimarray_white
         %
-        function workflow_truth (pathname_truth)
+        % revised 7-18-2018: added under- and over-flow pixels in percent
+        % revised 11-27-2018: into class
+        %
+        function frame2plot (foldername, filename, varname)
             
+            load([foldername '\' filename],varname)
+            
+            sizey = size(eval(varname),2);
+            sizex = size(eval(varname),3);
+            
+            % the "reflectance" matrix is 41x570544
+            whos
+            
+            % get the pixel count
+            n_total = sizey * sizex;
+            
+            % convert the matrix from 1D to 2D
+            data = reshape(eval(varname),41,sizey,sizex);
+            
+            % create a big figure; otherwise the titles are unreadable
+            h1 = figure('position',[10 100 1900 1000]);
+            
+            % sweep the wavelength
+            wl = 380;
+            for i = 1:41
+                
+                % retrieve the frame
+                im1 = squeeze(data(i,:,:));
+                
+                % get statistics
+                n_over =  nnz(im1 >= 1);
+                n_under = nnz(im1 <= 0);
+                
+                % re-create a color image
+                %         im = uint8(zeros(sizey,sizex,3));
+                %         im(:,:,1) = im1*255;
+                %         im(:,:,2) = im1*255;
+                %         im(:,:,3) = im1*255;
+                
+                % find a space to show the image
+                subplot(6,7,i)
+                
+                imagesc(im1)
+                axis off
+                
+                % show the statistics
+                title(sprintf('%d: [%.2f%% %.2f%%]',wl,n_under/n_total*100,n_over/n_total*100),'FontSize',8)
+                
+                % post iteration
+                wl = wl + 10;
+            end
+            
+            % save the image
+            saveas(h1,[foldername '\frames41.png'])
+            savefig(h1,[foldername '\frames41'])  % the png is awful
+        end
+        
+        
+        %% Show multispectral images of 41 bands
+        % revised 7-18-2018: added under- and over-flow pixels in percent
+        %
+        function frame2boxplot (foldername, filename, varname)
+            
+            filepath = [foldername '\' filename];
+            load(filepath,varname)
+            
+            sizey = size(eval(varname),2);
+            sizex = size(eval(varname),3);
+            n_total = sizey * sizex;
+            
+            vimarray_1d = reshape(eval(varname),41,n_total);
+            
+            % the "reflectance" matrix is 41x570544
+            whos
+            
+            % create a big figure; otherwise the titles are unreadable
+            h1 = figure('position',[10 100 1900 1000]);
+            
+            % boxplot
+            boxplot(vimarray_1d')
+            
+            % save the image
+            saveas(h1,[foldername '\boxplot.png'])
+        end
+        
+        
+        %
+        %
+        %
+        function transmittance2boxplot (pathname_truth)
+            
+            % read the "reflectance.mat" file from the folder
+            load([pathname_truth '\220 transmittance\transmittance'],'transmittance_array','sizey','sizex')
+            
+            % the "reflectance" matrix is 41x570544
+            whos
+            
+            % create a big figure; otherwise the titles are unreadable
+            h1 = figure('position',[10 100 1900 1000]);
+            
+            % boxplot
+            boxplot(transmittance_array')
+            
+            % save the image
+            % save the image
+            folderout = [pathname_truth '\220 transmittance'];
+            if exist(folderout,'dir') ~= 7
+                mkdir(folderout);
+            end
+            saveas(h1,[folderout '\boxplot.png'])
+            
+        end
+        
+        %% Visually check the transmittance and frames
+        %
+        %
+        function workflow_acquire_sanity_check (pathname_truth)
+            
+            if 0
+                MultispectralClass.frame2boxplot([pathname_truth '\120 frame'],'frame.mat','vimarray')
+                MultispectralClass.frame2boxplot([pathname_truth '\110 frame white'],'white.frame.mat','vimarray_white')
+                MultispectralClass.frame2boxplot([pathname_truth '\100 frame black'],'black.frame.mat','vimarray_black')
+                MultispectralClass.frame2plot([pathname_truth '\120 frame'],'frame.mat','vimarray')
+                MultispectralClass.frame2plot([pathname_truth '\110 frame white'],'white.frame.mat','vimarray_white')
+                MultispectralClass.frame2plot([pathname_truth '\100 frame black'],'black.frame.mat','vimarray_black')
+            end
+            
+            MultispectralClass.transmittance2boxplot(pathname_truth)
+            
+            disp('Use "close all" to close all figures')
+        end
+        
+        %% Acquire frames and calculate spectral transmittance
+        %
+        %
+        function workflow_acquire (pathname_truth, ol490)
+            
+            % acquire the frames
+            if 0
+            MultispectralClass.acquire_frames(pathname_truth,ol490,0)
+            end
+            
+            % calculate the spectral transmittance
             if 1
                 %% frame in
-                folderin = [pathname_truth '\110 frame white']
-                load([folderin '\white.frame.mat'],'vimarray0')
+                folderin = [pathname_truth '\100 frame black'];
+                load([folderin '\black.frame.mat'],'vimarray_black')
+                
+                folderin = [pathname_truth '\110 frame white'];
+                load([folderin '\white.frame.mat'],'vimarray_white')
                 
                 folderin = [pathname_truth '\120 frame'];
                 load([folderin '\frame.mat'],'vimarray')
-                
-                [transmittance_array, sizey, sizex] = MultispectralClass.frame2reflectance_white(vimarray, vimarray0);
+
+                [transmittance_array, sizey, sizex] = MultispectralClass.frame2transmittance_white_black(vimarray, vimarray_white, vimarray_black);
                 
                 folderout = [pathname_truth '\220 transmittance'];
                 if exist(folderout,'dir') ~= 7
@@ -393,6 +518,13 @@ classdef MultispectralClass
                 end
                 save([folderout '\transmittance.mat'],'transmittance_array','sizex','sizey','-V7.3')
             end
+            
+        end
+        
+        %% Calculate SPD, XYZ, LAB, and sRGB
+        %
+        %
+        function workflow_truth (pathname_truth)
             
             if 1
                 %% light source in
@@ -477,6 +609,101 @@ classdef MultispectralClass
             
             
         end
+        
+        
+        %% Calculate monochrome
+        %
+        %
+        function workflow_monochrome (pathname_truth, pathname_mono)
+            
+            if exist(pathname_mono,'dir') ~= 7
+                mkdir(pathname_mono);
+            end
+            
+            %% LAB in
+            folderin = [pathname_truth '\520 CIELAB'];
+            load([folderin '\LAB.mat'],'LAB','sizex','sizey')
+            
+            LAB_mono = MultispectralClass.LAB2monochrome(LAB);
+            
+            %% LAB out
+            folderout = [pathname_mono '\500 CIELAB'];
+            if exist(folderout,'dir') ~= 7
+                mkdir(folderout);
+            end
+            save([folderout '\LAB.mat'],'LAB_mono','sizex','sizey','-v7.3')
+            
+            %% sRGB out
+            folderout = [pathname_mono '\500 CIELAB'];
+            load([folderout '\LAB.mat'],'LAB_mono','sizex','sizey')
+            
+            %
+            % use Matlab lab2rgb() instead of my XYZ2sRGB
+            %
+            sRGB = lab2rgb(LAB_mono,'ColorSpace','srgb','WhitePoint','d65');
+            
+            folderout = [pathname_mono '\900 sRGB'];
+            if exist(folderout,'dir') ~= 7
+                mkdir(folderout);
+            end
+            
+            save([folderout '\sRGB.mat'],'sRGB','sizex','sizey','-v7.3')
+            imwrite(sRGB,[folderout '\monochrome.tif'])
+            
+        end
+        
+        %% Calculate dE
+        %
+        %
+        function workflow_dE (tissue_name, pathname_root)
+            pathname_tissue = [pathname_root '\' tissue_name];
+            pathname_truth = [pathname_tissue '\truth'];
+            pathname_mono = [pathname_tissue '\mono'];
+            
+            pathname_dE = [pathname_tissue '\dE'];
+            if exist(pathname_dE,'dir') ~= 7
+                mkdir(pathname_dE);
+            end
+            
+            %% LAB_truth in
+            folderin = [pathname_truth '\520 CIELAB'];
+            load([folderin '\LAB.mat'],'LAB','sizex','sizey')
+            LAB_truth = LAB;
+            LAB_truth_1d = reshape(LAB_truth,sizey*sizex,3);
+            
+            %% LAB_mono in
+            folderin = [pathname_mono '\500 CIELAB'];
+            load([folderin '\LAB.mat'],'LAB_mono','sizex','sizey')
+            LAB_mono_1d = reshape(LAB_mono,sizey*sizex,3);
+            
+            %% dE
+            [dE00_1d dE94_1d dEab_1d] = ColorConversionClass.LAB2dE(LAB_truth_1d',LAB_mono_1d');
+            dE00 = reshape(dE00_1d,sizey,sizex);
+            dE94 = reshape(dE94_1d,sizey,sizex);
+            dEab = reshape(dEab_1d,sizey,sizex);
+            
+            if 0
+                %% verify with Sharma's code
+                n = sizex * sizey;
+                dE00_single = zeros(1,n);
+                dE94_single = zeros(1,n);
+                dEab_single = zeros(1,n);
+                for i = 1:n
+                    [dE00_single(i) dE94_single(i) dEab_single(i)] = ColorConversionClass.LAB2dE(LAB_truth_1d(i,:)',LAB_mono_1d(i,:)');
+                    dE00_sharma_single(i) = ColorConversionClass.deltaE2000_Sharma(LAB_truth_1d(i,:),LAB_mono_1d(i,:));
+                end
+                
+                boxplot([dE00_sharma_single' dE00_single' dE94_single' dEab_single' dE00_1d' dE94_1d' dEab_1d'],...
+                    {'dE00 Sharma','dE00 single','dE94 single','dEab single','dE00 vector','dE94 vector','dEab vector'})
+                
+            end
+            
+            
+            %% dE out
+            save([pathname_dE '\dE.mat'],'dEab','dE94','dE00','sizex','sizey','-v7.3')
+            
+        end
+        
         
     end
 end
