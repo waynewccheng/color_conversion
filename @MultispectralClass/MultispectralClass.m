@@ -130,8 +130,8 @@ if 1
             mask_less_than_black = (ddl_array <= ddl_black_array) & ((ddl_white_array - ddl_black_array) > threshold);
             transmittance_array(mask_less_than_black) = 0;
 
-            % mask_dynamic_range_too_small = (ddl_white_array - ddl_black_array) < threshold;
-            % transmittance_array(mask_dynamic_range_too_small) = 0;
+            mask_dynamic_range_too_small = (ddl_white_array - ddl_black_array) < threshold;
+            transmittance_array(mask_dynamic_range_too_small) = 0;
             
 else
             % ----------------------------------
@@ -352,7 +352,8 @@ end
                 
                 var_size = whos('vimarray');
                 if var_size.bytes > 2*1000*1000*1000
-                    save([folderout '/frame.mat'],'vimarray','-v7.3','-nocompression')
+%                    save([folderout '/frame.mat'],'vimarray','-v7.3','-nocompression')
+                    save([folderout '/frame.mat'],'vimarray','-v7.3')
                 else
                     save([folderout '/frame.mat'],'vimarray')
                 end
@@ -366,7 +367,8 @@ end
                 
                 var_size = whos('vimarray_white');
                 if var_size.bytes > 2*1000*1000*1000
-                    save([folderout '/white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
+%                    save([folderout '/white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
+                    save([folderout '/white.frame.mat'],'vimarray_white','-v7.3')
                 else
                     save([folderout '/white.frame.mat'],'vimarray_white')
                 end
@@ -380,7 +382,8 @@ end
                 
                 var_size = whos('vimarray_black');
                 if var_size.bytes > 2*1000*1000*1000
-                    save([folderout '/black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
+%                    save([folderout '/black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
+                    save([folderout '/black.frame.mat'],'vimarray_black','-v7.3')
                 else
                     save([folderout '/black.frame.mat'],'vimarray_black')
                 end
@@ -549,7 +552,7 @@ end
         %
         function workflow_acquire_sanity_check (pathname_truth)
             
-            if 1
+            if 0
                 MultispectralClass.frame2boxplot([pathname_truth '/120 frame'],'frame.mat','vimarray')
                 MultispectralClass.frame2boxplot([pathname_truth '/110 frame white'],'white.frame.mat','vimarray_white')
                 MultispectralClass.frame2boxplot([pathname_truth '/100 frame black'],'black.frame.mat','vimarray_black')
@@ -569,8 +572,9 @@ end
         function workflow_acquire (pathname_truth, ol490)
             
             % acquire the frames
-            if 0
-            MultispectralClass.acquire_frames(pathname_truth,ol490,0)
+            if 1
+%            MultispectralClass.acquire_frames(pathname_truth,ol490,0)
+            MultispectralClass.acquire_frames(pathname_truth,ol490,1)
             end
             
             % calculate the spectral transmittance
