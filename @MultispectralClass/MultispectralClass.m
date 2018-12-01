@@ -26,7 +26,7 @@ classdef MultispectralClass
         % capture 41 images from 380 to 780
         % output: vimarray(41,480,640)
         %
-        function vimarray = camera2frame (pathout, numberofshots, ol490, big_or_small)
+        function [vimarray caminfo] = camera2frame (numberofshots, ol490, big_or_small)
             
             disp('Capturing frames with wavelength from 380 to 780 nm...')
             
@@ -38,8 +38,11 @@ classdef MultispectralClass
                 cam = CameraClass9MPSmall
             end
             
-            cam_vid = get(cam.vid)
-            cam_src = get(cam.src)
+            caminfo.vid = get(cam.vid);
+            caminfo.src = get(cam.src);
+            caminfo.sizex = cam.sizex;
+            caminfo.sizey = cam.sizey;
+            caminfo.time1 = datetime;
             
             %            mkdir(pathout)
             %            fnout_info = sprintf('%s/info',pathout);
@@ -61,6 +64,7 @@ classdef MultispectralClass
             for wl=380:10:780
                 % prepare light
                 
+                fprintf('%d ',wl)
                 ol490.setPeak(wl,bandwidth,intensity);
                 
                 % focus
@@ -75,6 +79,9 @@ classdef MultispectralClass
                 
                 k = k + 1;
             end
+            
+            caminfo.time2 = datetime;
+            disp(' done!')
             
             % exit
             cam.close;
@@ -114,38 +121,38 @@ classdef MultispectralClass
             
             %  analyze the frame
             analyze_frame('order_stat_after');
-
+            
             % calculate the transmittance
             transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
-
+            
             
             %% Condition the transmittance
-if 1
-            % TBD
-            threshold = 150;
+            if 1
+                % TBD
+                threshold = 150;
+                
+                mask_greater_than_white = (ddl_array >= ddl_white_array) & ((ddl_white_array - ddl_black_array) > threshold);
+                transmittance_array(mask_greater_than_white) = 1;
+                
+                mask_less_than_black = (ddl_array <= ddl_black_array) & ((ddl_white_array - ddl_black_array) > threshold);
+                transmittance_array(mask_less_than_black) = 0;
+                
+                mask_dynamic_range_too_small = (ddl_white_array - ddl_black_array) < threshold;
+                transmittance_array(mask_dynamic_range_too_small) = 0;
+                
+            else
+                % ----------------------------------
+                % clip at 1 => not a good solution !!!
+                transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
+                transmittance_array = min(transmittance_array,1);
+                transmittance_array = max(transmittance_array,0);
+            end
             
-            mask_greater_than_white = (ddl_array >= ddl_white_array) & ((ddl_white_array - ddl_black_array) > threshold);
-            transmittance_array(mask_greater_than_white) = 1;
-
-            mask_less_than_black = (ddl_array <= ddl_black_array) & ((ddl_white_array - ddl_black_array) > threshold);
-            transmittance_array(mask_less_than_black) = 0;
-
-            mask_dynamic_range_too_small = (ddl_white_array - ddl_black_array) < threshold;
-            transmittance_array(mask_dynamic_range_too_small) = 0;
-            
-else
-            % ----------------------------------
-            % clip at 1 => not a good solution !!!
-            transmittance_array = (ddl_array - ddl_black_array) ./ (ddl_white_array - ddl_black_array);
-            transmittance_array = min(transmittance_array,1);
-            transmittance_array = max(transmittance_array,0);
-end
-
             return
-
+            
             %
-            % 
-            % 
+            %
+            %
             function analyze_frame (fn)
                 
                 if 1
@@ -175,7 +182,7 @@ end
                 end
                 
                 order_stat = order_stat / size(ddl_array,2);
-
+                
                 save(fn,'order_stat')
                 
                 % visualization
@@ -275,34 +282,20 @@ end
         %
         %
         %
-        function acquire_frames (pathname_truth, ol490, big_or_small)
-            
-            tic
+        function acquire_frames (location_filename, pathname_truth, ol490, big_or_small)
             
             % load('config.mat','LUDL_PORT');
             LUDL_PORT = 'COM14'
-            
             ludl = LudlClass(LUDL_PORT);
             
             %% Step 0: choose ROI and focus
             
-            % 0: use new location; 1: use old location
-            if 0
-                
-                % determine the ROI locations for target and reference white
-                findroi()
-                
-                % save the ROI locations
-                if exist(pathname_truth,'dir') ~= 7
-                    mkdir(pathname_truth)
-                end
-                save([pathname_truth '/info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
-                
+            % bypass scanning: use the previously saved locations
+            if exist(location_filename,'file')
+                load(location_filename,'xyz*')
             else
-                
-                % shortcut: use the previously saved locations
-                load([pathname_truth '/info.mat'],'xy','z','xy_white','z_white','xy_black','z_black')
-                
+                disp('Location file not found!!!!!')
+                exit
             end
             
             %% Step 1: take frames
@@ -312,38 +305,48 @@ end
                 n_times = 10;
                 
                 disp('Moving to the ROI')
-                ludl.setXY(xy)
-                ludl.setZ(z)
+                tic
+                ludl.setXY(xyz(1:2))
+                ludl.setZ(xyz(3))
+                toc
                 
                 disp('Getting frames for ROI')
-                vimarray = MultispectralClass.camera2frame(pathname_truth,n_times,ol490,big_or_small);
+                tic
+                [vimarray caminfo] = MultispectralClass.camera2frame(n_times,ol490,big_or_small);
+                toc
                 
                 disp('Moving to the reference white')
-                ludl.setXY(xy_white)
-                ludl.setZ(z_white)
+                tic
+                ludl.setXY(xyz_white(1:2))
+                ludl.setZ(xyz_white(3))
+                toc
                 
                 disp('Getting frames for white')
-                vimarray_white = MultispectralClass.camera2frame(pathname_truth,n_times,ol490,big_or_small);
-
+                tic
+                [vimarray_white caminfo_white] = MultispectralClass.camera2frame(n_times,ol490,big_or_small);
+                toc
+                
                 disp('Moving to the reference black')
-                ludl.setXY(xy_black)
-                ludl.setZ(z_black)
+                tic
+                ludl.setXY(xyz_black(1:2))
+                ludl.setZ(xyz_black(3))
+                toc
                 
                 disp('Getting frames for black')
-                vimarray_black = MultispectralClass.camera2frame(pathname_truth,n_times,ol490,big_or_small);
-                
+                tic
+                [vimarray_black caminfo_black] = MultispectralClass.camera2frame(n_times,ol490,big_or_small);
+                toc
                 
                 ol490.setWhite      % recover the light to white
                 
-                ludl.setXY(xy)      % return to the ROI
-                ludl.setZ(z)
+                ludl.setXY(xyz(1:2))      % return to the ROI
+                ludl.setZ(xyz(3))
                 
                 ludl.close;
                 
                 
                 % save data after closing devices
-                disp('Saving captured frames in vimarray...')
-                
+                disp('Saving truth frames')
                 tic
                 folderout = [pathname_truth '/120 frame'];
                 if exist(folderout,'dir') ~= 7
@@ -352,13 +355,15 @@ end
                 
                 var_size = whos('vimarray');
                 if var_size.bytes > 2*1000*1000*1000
-%                    save([folderout '/frame.mat'],'vimarray','-v7.3','-nocompression')
+                    %                    save([folderout '/frame.mat'],'vimarray','-v7.3','-nocompression')
                     save([folderout '/frame.mat'],'vimarray','-v7.3')
                 else
                     save([folderout '/frame.mat'],'vimarray')
                 end
+                save([folderout '/caminfo.mat'],'caminfo','xyz')
                 toc
                 
+                disp('Saving white frames')
                 tic
                 folderout = [pathname_truth '/110 frame white'];
                 if exist(folderout,'dir') ~= 7
@@ -367,13 +372,15 @@ end
                 
                 var_size = whos('vimarray_white');
                 if var_size.bytes > 2*1000*1000*1000
-%                    save([folderout '/white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
+                    %                    save([folderout '/white.frame.mat'],'vimarray_white','-v7.3','-nocompression')
                     save([folderout '/white.frame.mat'],'vimarray_white','-v7.3')
                 else
                     save([folderout '/white.frame.mat'],'vimarray_white')
                 end
+                save([folderout '/caminfo.mat'],'caminfo_white','xyz_white')
                 toc
-
+                
+                disp('Saving black frames')
                 tic
                 folderout = [pathname_truth '/100 frame black'];
                 if exist(folderout,'dir') ~= 7
@@ -382,50 +389,69 @@ end
                 
                 var_size = whos('vimarray_black');
                 if var_size.bytes > 2*1000*1000*1000
-%                    save([folderout '/black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
+                    %                    save([folderout '/black.frame.mat'],'vimarray_black','-v7.3','-nocompression')
                     save([folderout '/black.frame.mat'],'vimarray_black','-v7.3')
                 else
                     save([folderout '/black.frame.mat'],'vimarray_black')
                 end
-                toc                
+                save([folderout '/caminfo.mat'],'caminfo_black','xyz_black')
+                toc
                 
                 return
                 
             end
             
-            %
-            % 4-10-2018
-            %
-            function findroi
-                
-                % turn on the light
-                ol490.setWhite
-                
-                vid = videoinput('pointgrey', 1, 'F7_Mono8_844x676_Mode5');
-                src = getselectedsource(vid);
-                
-                vid.FramesPerTrigger = 1;
-                
-                preview(vid);
-                
-                a = input('Press Enter to save location of ROI:')
-                xy = ludl.getXY
-                z = ludl.getZ
-                
-                
-                a = input('Press Enter to save location of white:')
-                xy_white = ludl.getXY
-                z_white = ludl.getZ
-                
-                a = input('Press Enter to save location of black:')
-                xy_black = ludl.getXY
-                z_black = ludl.getZ
-                
-                delete(vid)
-                
-            end
             
         end
+
+        % define ROI locations
+        % 11-30-2018
+        % 4-10-2018
+        function find_ROI_white_black (ol490, ludl_port_name, filename)
+            
+            %ludl_port_name = 'COM14'
+            
+            % turn on the light
+            ol490.setWhite
+            
+            vid = videoinput('pointgrey', 1, 'F7_Mono8_844x676_Mode5');
+            src = getselectedsource(vid);
+            
+            vid.FramesPerTrigger = 1;
+            
+            preview(vid);
+            
+            ludl = LudlClass(ludl_port_name)
+            
+            
+            a = input('Press Enter to save location of ROI:')
+            
+            xy = ludl.getXY
+            z = ludl.getZ
+            xyz = [xy z]
+            
+            
+            a = input('Press Enter to save location of white:')
+            
+            xy_white = ludl.getXY
+            z_white = ludl.getZ
+            xyz_white = [xy_white z_white]
+            
+            
+            a = input('Press Enter to save location of black:')
+            
+            xy_black = ludl.getXY
+            z_black = ludl.getZ
+            xyz_black = [xy_black z_black]
+            
+            ludl.close
+            
+            delete(vid)
+            
+            save(filename,'xyz*')
+            
+        end
+        
         
         %% Show images of 41 bands in subplots
         %
@@ -552,7 +578,7 @@ end
         %
         function workflow_acquire_sanity_check (pathname_truth)
             
-            if 0
+            if 1
                 MultispectralClass.frame2boxplot([pathname_truth '/120 frame'],'frame.mat','vimarray')
                 MultispectralClass.frame2boxplot([pathname_truth '/110 frame white'],'white.frame.mat','vimarray_white')
                 MultispectralClass.frame2boxplot([pathname_truth '/100 frame black'],'black.frame.mat','vimarray_black')
@@ -569,12 +595,15 @@ end
         %% Acquire frames and calculate spectral transmittance
         %
         %
-        function workflow_acquire (pathname_truth, ol490)
+        function workflow_acquire (location_filename, pathname_truth, ol490)
             
             % acquire the frames
             if 1
-%            MultispectralClass.acquire_frames(pathname_truth,ol490,0)
-            MultispectralClass.acquire_frames(pathname_truth,ol490,1)
+                % for testing
+                % MultispectralClass.acquire_frames(location_filename, pathname_truth,ol490,0) %small
+                
+                % for testing
+                MultispectralClass.acquire_frames(location_filename, pathname_truth,ol490,1)   %big
             end
             
             % calculate the spectral transmittance
@@ -588,7 +617,7 @@ end
                 
                 folderin = [pathname_truth '/120 frame'];
                 load([folderin '/frame.mat'],'vimarray')
-
+                
                 [transmittance_array, sizey, sizex] = MultispectralClass.frame2transmittance_white_black(vimarray, vimarray_white, vimarray_black);
                 
                 folderout = [pathname_truth '/220 transmittance'];
@@ -604,6 +633,10 @@ end
         %
         %
         function workflow_truth (pathname_truth)
+            
+            if exist(pathname_truth,'dir') ~= 7
+                mkdir(pathname_truth);
+            end
             
             if 1
                 %% light source in
@@ -734,12 +767,8 @@ end
         %% Calculate dE
         %
         %
-        function workflow_dE (tissue_name, pathname_root)
-            pathname_tissue = [pathname_root '/' tissue_name];
-            pathname_truth = [pathname_tissue '/truth'];
-            pathname_mono = [pathname_tissue '/mono'];
+        function workflow_dE (pathname_truth, pathname_mono, pathname_dE)
             
-            pathname_dE = [pathname_tissue '/dE'];
             if exist(pathname_dE,'dir') ~= 7
                 mkdir(pathname_dE);
             end
@@ -783,6 +812,52 @@ end
             
         end
         
+        %% All
+        %
+        %
+        function workflow_all (pathname)
+            global ol490
+            
+            if exist(pathname,'dir') ~= 7
+                mkdir(pathname);
+            end
+            
+            path_truth = [pathname '/truth']
+            path_mono = [pathname '/mono']
+            path_dE = [pathname '/dE']
+            
+            location_filename = [pathname '/stageinfo.mat'];
+            
+            % MultispectralClass.find_ROI_white_black(ol490,'COM14',location_filename);
+            
+            if 1
+                MultispectralClass.workflow_acquire(location_filename,path_truth,ol490)
+            end
+            
+            % MultispectralClass.workflow_acquire_sanity_check(path_truth)
+            
+            if 1
+                MultispectralClass.workflow_truth(path_truth)
+            end
+            
+            if 0
+                MultispectralClass.workflow_monochrome(path_truth, path_mono)
+            end
+            
+            if 0
+                MultispectralClass.workflow_dE(path_truth, path_mono, path_dE)
+            end
+            
+        end
+        
+        %% tissues
+        %
+        %
+        function workflow_3_tissue ()        
+            MultispectralClass.workflow_all('C:\Users\wcc\Desktop\colon4')    
+%            MultispectralClass.workflow_all('C:\Users\wcc\Desktop\kidney4')    
+            %MultispectralClass.workflow_all('C:\Users\wcc\Desktop\colon2')    
+        end
         
     end
 end
