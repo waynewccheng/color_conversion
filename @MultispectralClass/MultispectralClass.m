@@ -830,13 +830,15 @@ classdef MultispectralClass
             
             % MultispectralClass.find_ROI_white_black(ol490,'COM14',location_filename);
             
-            if 1
+            if 0
                 MultispectralClass.workflow_acquire(location_filename,path_truth,ol490)
             end
             
-            % MultispectralClass.workflow_acquire_sanity_check(path_truth)
-            
             if 1
+                MultispectralClass.workflow_acquire_sanity_check(path_truth)
+            end
+            
+            if 0
                 MultispectralClass.workflow_truth(path_truth)
             end
             
@@ -854,9 +856,9 @@ classdef MultispectralClass
         %
         %
         function workflow_3_tissue ()        
-            MultispectralClass.workflow_all('C:\Users\wcc\Desktop\colon4')    
-%            MultispectralClass.workflow_all('C:\Users\wcc\Desktop\kidney4')    
-            %MultispectralClass.workflow_all('C:\Users\wcc\Desktop\colon2')    
+            MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\colon4')    
+            MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\kidney4')    
+            MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\skin2')    
         end
         
     end
