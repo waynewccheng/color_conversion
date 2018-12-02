@@ -890,7 +890,7 @@ classdef MultispectralClass
             path_aperio_roi = [pathname '/aperio/200 roi/aperio.tif']
             path_aperio_reg = [pathname '/aperio/400 sRGB']
             
-%            MultispectralClass.register_controlpoint_save(path_truth,path_aperio_roi,path_aperio_reg)
+            MultispectralClass.register_controlpoint_save(path_truth,path_aperio_roi,path_aperio_reg)
             MultispectralClass.register_controlpoint_show(path_truth,path_aperio_roi,path_aperio_reg)
 %            MultispectralClass.check_registration_with_bars(path_aperio_reg)
 
