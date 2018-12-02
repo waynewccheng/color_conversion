@@ -13,18 +13,21 @@ function registered = register_controlpoint (original_fn, unregistered_fn, folde
 original = imread(original_fn);
 unregistered = imread(unregistered_fn);
 
-% fuse two images with red and green
-imf_before = imfuse(original,unregistered,'falsecolor','Scaling','joint','ColorChannels',[1 2 0]);
 
 %% Control Points
 % use cpselect GUI to choose control points
 % and wait until control points are exported
 
 % use previous selected control points?
-    [movingPoints,fixedPoints] = cpselect(unregistered, original, 'Wait', true);
+    [movingPoints,fixedPoints] = cpselect(original, unregistered, 'Wait', true);
     save([folder_output '/my_control_points'],'movingPoints','fixedPoints')
 
-% cp_method = 'NonreflectiveSimilarity';
+if 0    
+
+% fuse two images with red and green
+imf_before = imfuse(original,unregistered,'falsecolor','Scaling','joint','ColorChannels',[1 2 0]);
+    
+    % cp_method = 'NonreflectiveSimilarity';
 cp_method = 'affine';
 
 %% Registered results using control points only
@@ -63,5 +66,8 @@ imf_cp_corr = imfuse(original,registered_cp_corr,'falsecolor','Scaling','joint',
 save([folder_output '/my_geotrans'],'mytform_cp','mytform_cp_corr')
 save([folder_output '/output_images'],'original','unregistered','registered_cp','registered_cp_corr','imf_before','imf_cp_corr')
 
+end
+
 return
+
 end

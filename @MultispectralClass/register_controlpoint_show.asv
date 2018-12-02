@@ -31,8 +31,7 @@ if 0
     %% Registered results using control points only
     % calculate the transform
     mytform_cp = fitgeotrans(movingPoints, fixedPoints, cp_method);
-    mytform_cp.T
-    
+
     % apply the transform and clip it with the window of the original image
     registered_cp = imwarp(original, mytform_cp,'OutputView',imref2d(size(unregistered)));
     
@@ -70,25 +69,23 @@ else
     % https://www.mathworks.com/help/images/register-images-using-the-registration-estimator-app.html
     load([folder_output '/matlab_registration'],'movingReg');
 
-    mytform_cp_corr = movingReg.Transformation;
+    mytform_cp = movingReg.Transformation;
     
-    % apply the transform and clip it with the window of the original image
-    registered_cp_corr = imwarp(original, mytform_cp_corr,'OutputView',imref2d(size(unregistered)) );
-    
-    % fuse two images with red and green
-    imf_cp_corr = imfuse(registered_cp_corr,unregistered,'falsecolor','Scaling','joint','ColorChannels',[1 2 0]);
     
 end
+
+mytform_cp.T
+
 
 
 %% trim images
 truth_sizex = size(original,2);
 truth_sizey = size(original,1);
 
-p_11 = [1 1 1] * mytform_cp_corr.T;
-p_x1 = [truth_sizex 1 1] * mytform_cp_corr.T;
-p_1y = [1 truth_sizey 1] * mytform_cp_corr.T;
-p_xy = [truth_sizex truth_sizey 1] * mytform_cp_corr.T;
+p_11 = [1 1 1] * mytform_cp_corr.T
+p_x1 = [truth_sizex 1 1] * mytform_cp_corr.T
+p_1y = [1 truth_sizey 1] * mytform_cp_corr.T
+p_xy = [truth_sizex truth_sizey 1] * mytform_cp_corr.T
 
 P_x_min = ceil(max([1 p_11(1) p_1y(1)]));
 P_x_max = floor(min([size(registered_cp_corr,2) p_x1(1) p_xy(1)]));
@@ -102,7 +99,6 @@ unregistered_trimmed = unregistered(P_y_min:P_y_max,P_x_min:P_x_max,:);
 registered_cp_corr_trimmed = registered_cp_corr(P_y_min:P_y_max,P_x_min:P_x_max,:);
 
 save([folder_output '/final_images'],'unregistered_trimmed','registered_cp_corr_trimmed')
-
 
 %% Visualization
 

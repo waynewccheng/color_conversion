@@ -187,7 +187,7 @@ while flag==1
                 plot(profxline2,'c:')
                 %plot(profxline2_adjusted,'c:')
                 
-                xlabel(sprintf('X position (Y=%d/%d), R=%.4f',cursor(2),size(profyline1,1),profxcorrcoef(1,2)))
+                xlabel(sprintf('X position (Y=%d/%d), R=%.4f',cursor(2),size(profxline1,),profxcorrcoef(1,2)))
                 ylabel('L^*','Rotation',0)
                 axis([1 size(lab1,2) 0 100])
                 
@@ -204,7 +204,7 @@ while flag==1
                 %plot(profyline2_adjusted,profydi,'m:')
                 
                 xlabel('L^*')
-                ylabel(sprintf('Y position (X=%d/%d), R=%.4f',cursor(1),size(profxline1,2),profycorrcoef(1,2)))
+                ylabel(sprintf('Y position (X=%d/%d), R=%.4f',cursor(1),size(profyline1,),profycorrcoef(1,2)))
                 axis([0 100 1 size(lab1,1)])
                 
                 profy.XAxisLocation = 'top';

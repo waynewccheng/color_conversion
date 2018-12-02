@@ -885,17 +885,41 @@ classdef MultispectralClass
         %%
         %
         %
-        function register_aperio (pathname)
-            path_truth = [pathname '/truth/900 sRGB/truth.tif']
-            path_aperio_roi = [pathname '/aperio/200 roi/aperio.tif']
-            path_aperio_reg = [pathname '/aperio/400 sRGB']
+        function register_scanner (path_truth, path_scan)
+            filepath_truth = [path_truth '/900 sRGB/truth.tif']
+            filepath_roi = [path_scan '/200 roi/scan.tif']
+            filepath_reg = [path_scan '/400 sRGB']
             
-%            MultispectralClass.register_controlpoint_save(path_truth,path_aperio_roi,path_aperio_reg)
-            MultispectralClass.register_controlpoint_show(path_truth,path_aperio_roi,path_aperio_reg)
-%            MultispectralClass.check_registration_with_bars(path_aperio_reg)
+%            MultispectralClass.register_controlpoint_save(fikepath_truth,filepath_roi,filepath_reg)
+            MultispectralClass.register_controlpoint_show(filepath_truth,filepath_roi,filepath_reg)
+            MultispectralClass.check_registration_with_bars(filepath_reg)
+
+        end
+
+        
+        %%
+        %
+        %
+        function register_scanner_tissue
+            
+            datasetname = 'C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\'
+            pathname = [datasetname '/kidney4']
+            scannername = 'zeiss';
+            
+            path_truth = [pathname '/truth']
+            path_scan = [pathname '/' scannername]
+            
+            MultispectralClass.register_scanner(path_truth,path_scan)            
 
         end
         
+        % placeholder
+        % does not work because of workspace
+        function save_matlab_registration
+            save('matlab_registration','movingReg')
+        end
+        
     end
+    
 end
 
