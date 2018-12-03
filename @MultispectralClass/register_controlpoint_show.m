@@ -6,7 +6,7 @@
 % Register an Aerial Photograph to a Digital Orthophoto
 % how to show the aligned images?
 
-function register_controlpoint_show (original_fn, unregistered_fn, folder_output)
+function register_controlpoint_show (original_fn, unregistered_fn, folder_output, lab_truth_fn)
 
 %%
 % load two images
@@ -101,7 +101,25 @@ P_y_max = floor(min([size(registered_cp_corr,1) p_1y(2) p_xy(2)]));
 unregistered_trimmed = unregistered(P_y_min:P_y_max,P_x_min:P_x_max,:);
 registered_cp_corr_trimmed = registered_cp_corr(P_y_min:P_y_max,P_x_min:P_x_max,:);
 
-save([folder_output '/final_images'],'unregistered_trimmed','registered_cp_corr_trimmed')
+
+%% LAB of truth
+
+% load the truth LAB data 
+load([lab_truth_fn '/LAB.mat'],'LAB')
+
+% use the same transform to process the LAB data
+LAB_truth_reg = imwarp(LAB, mytform_cp_corr,'OutputView',imref2d(size(unregistered)) );
+
+% trim the LAB data
+LAB_truth_reg_trimmed = LAB_truth_reg(P_y_min:P_y_max,P_x_min:P_x_max,:);
+
+
+%% LAB of scan
+LAB_scan = rgb2lab(unregistered_trimmed,'ColorSpace','srgb','WhitePoint','d65');
+
+
+%% save the LAB data
+save([folder_output '/final_images'],'unregistered_trimmed','registered_cp_corr_trimmed','LAB_truth_reg_trimmed','LAB_scan')
 
 
 %% Visualization
