@@ -8,6 +8,12 @@ classdef MultispectralClass
     end
     
     methods (Static)
+        % register_controlpoint_save (original_fn, unregistered_fn, folder_output)
+        register_controlpoint_show (original_fn, unregistered_fn, folder_output, lab_truth_fn)
+        check_registration_with_bars (folder)
+    end
+    
+    methods (Static)
         
         function obj = MultispectralClass
         end
@@ -811,6 +817,37 @@ classdef MultispectralClass
             save([pathname_dE '\dE.mat'],'dEab','dE94','dE00','sizex','sizey','-v7.3')
             
         end
+
+        %% Calculate dE for scanner
+        %
+        %
+        function workflow_dE_scan (LAB_truth, LAB_scan, pathname_dE)
+            
+            if exist(pathname_dE,'dir') ~= 7
+                mkdir(pathname_dE);
+            end
+            
+            %% LAB_truth in
+            sizex = size(LAB_truth,2);
+            sizey = size(LAB_truth,1);
+            LAB_truth_1d = reshape(LAB_truth,sizey*sizex,3);
+            
+            %% LAB_mono in
+            sizex = size(LAB_scan,2);
+            sizey = size(LAB_scan,1);
+            LAB_scan_1d = reshape(LAB_scan,sizey*sizex,3);
+            
+            %% dE
+            [dE00_1d dE94_1d dEab_1d] = ColorConversionClass.LAB2dE(LAB_truth_1d',LAB_scan_1d');
+            dE00 = reshape(dE00_1d,sizey,sizex);
+            dE94 = reshape(dE94_1d,sizey,sizex);
+            dEab = reshape(dEab_1d,sizey,sizex);
+            
+            
+            %% dE out
+            save([pathname_dE '\dE.mat'],'dEab','dE94','dE00','sizex','sizey','-v7.3')
+            
+        end        
         
         %% All
         %
@@ -861,6 +898,51 @@ classdef MultispectralClass
             MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\skin2')    
         end
         
+
+        
+        %%
+        %
+        %
+        function register_scanner (path_truth, path_scan)
+            filepath_truth = [path_truth '/900 sRGB/truth.tif'];
+            filepath_truth_lab = [path_truth '/520 CIELAB'];
+            filepath_roi = [path_scan '/200 roi/scan.tif'];
+            filepath_reg = [path_scan '/400 sRGB'];
+            
+%            MultispectralClass.register_controlpoint_save(fikepath_truth,filepath_roi,filepath_reg)
+% use Matlab app to register
+% export result to movingReg
+% save movingReg to matlab_registration.mat
+
+            MultispectralClass.register_controlpoint_show(filepath_truth,filepath_roi,filepath_reg,filepath_truth_lab)
+%            MultispectralClass.check_registration_with_bars(filepath_reg)
+
+        end
+
+        
+        %%
+        %
+        %
+        function register_scanner_tissue
+            
+            datasetname = 'C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\'
+            pathname = [datasetname '/kidney4']
+            scannername = 'aperio';
+            
+            path_truth = [pathname '/truth']
+            path_scan = [pathname '/' scannername]
+            
+            MultispectralClass.register_scanner(path_truth,path_scan)            
+
+        end
+        
+        % placeholder
+        % does not work because of workspace
+        function save_matlab_registration
+            save('matlab_registration','movingReg')
+        end
+        
     end
+    
 end
 
