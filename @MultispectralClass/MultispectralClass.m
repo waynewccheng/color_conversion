@@ -514,7 +514,7 @@ classdef MultispectralClass
             
             % save the image
             saveas(h1,[foldername '/frames41.png'])
-            savefig(h1,[foldername '/frames41'])  % the png is awful
+%            savefig(h1,[foldername '/frames41'])  % the png is awful
         end
         
         
