@@ -871,7 +871,7 @@ classdef MultispectralClass
                 MultispectralClass.workflow_acquire(location_filename,path_truth,ol490)
             end
             
-            if 1
+            if 0
                 MultispectralClass.workflow_acquire_sanity_check(path_truth)
             end
             
@@ -894,8 +894,8 @@ classdef MultispectralClass
         %
         function workflow_3_tissue ()        
             MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\colon4')    
-            MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\kidney4')    
-            MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\skin2')    
+            %MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\kidney4')    
+            %MultispectralClass.workflow_all('C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\skin2')    
         end
         
 
@@ -914,8 +914,8 @@ classdef MultispectralClass
 % export result to movingReg
 % save movingReg to matlab_registration.mat
 
-            MultispectralClass.register_controlpoint_show(filepath_truth,filepath_roi,filepath_reg,filepath_truth_lab)
-%            MultispectralClass.check_registration_with_bars(filepath_reg)
+%            MultispectralClass.register_controlpoint_show(filepath_truth,filepath_roi,filepath_reg,filepath_truth_lab)
+            MultispectralClass.check_registration_with_bars(filepath_reg)
 
         end
 
@@ -926,7 +926,7 @@ classdef MultispectralClass
         function register_scanner_tissue
             
             datasetname = 'C:\Users\wcc\Documents\GitHub\BSC truth 11-30-2018\'
-            pathname = [datasetname '/kidney4']
+            pathname = [datasetname '/colon4']
             scannername = 'aperio';
             
             path_truth = [pathname '/truth']

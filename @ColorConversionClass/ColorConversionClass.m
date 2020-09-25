@@ -500,7 +500,25 @@ classdef ColorConversionClass
             dEab = reshape(dEab_1d,size(im1,1),size(im1,2));
             
         end
-        
+
+        %
+        %
+        %
+        function [dE00 dE94 dEab] = im2dE (im1,im2)
+            
+            lab1 = rgb2lab(im1,'ColorSpace','srgb','WhitePoint','d65');
+            lab2 = rgb2lab(im2,'ColorSpace','srgb','WhitePoint','d65');
+            
+            lab1_1d = reshape(lab1,size(lab1,1)*size(lab1,2),3);
+            lab2_1d = reshape(lab2,size(lab2,1)*size(lab2,2),3);
+            
+            [dE00_1d dE94_1d dEab_1d] = ColorConversionClass.LAB2dE(lab1_1d',lab2_1d');
+            
+            dE00 = reshape(dE00_1d,size(im1,1),size(im1,2));
+            dE94 = reshape(dE94_1d,size(im1,1),size(im1,2));
+            dEab = reshape(dEab_1d,size(im1,1),size(im1,2));
+            
+        end        
         
     end
 end
