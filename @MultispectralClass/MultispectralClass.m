@@ -996,14 +996,14 @@ classdef MultispectralClass
         %
         function register_scanner_tissue
             
-            datasetname = 'E:\DigitalPathology\GitHub_Repos\color_conversion\'
-            pathname = [datasetname '/Camelyon_T11_11969_Tag2']
+            datasetname = 'E:/DigitalPathology/GitHub_Repos/'
+            pathname = [datasetname 'Camelyon_T11_11969_Tag2']
             scannername = 'hamamatsu';
             
             path_truth = [pathname '/truth']
             path_scan = [pathname '/' scannername]
             
-            MultispectralClass.register_scanner(path_truth,path_scan,pathname,scannername)            
+            MultispectralClass.register_scanner(path_truth,path_scan,pathrename,scannername)            
 
         end
         
