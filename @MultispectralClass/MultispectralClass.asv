@@ -998,7 +998,7 @@ classdef MultispectralClass
             
             datasetname = 'E:\DigitalPathology\GitHub_Repos\color_conversion\'
             pathname = [datasetname '/Camelyon_T11_11969_Tag2']
-            scannername = 'hamamatsu';
+            scannername = 'zeiss';
             
             path_truth = [pathname '/truth']
             path_scan = [pathname '/' scannername]

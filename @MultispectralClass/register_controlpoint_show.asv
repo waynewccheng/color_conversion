@@ -6,7 +6,7 @@
 % Register an Aerial Photograph to a Digital Orthophoto
 % how to show the aligned images?
 
-function [LAB_scan, LAB_truth_reg_trimmed] = register_controlpoint_show (original_fn, unregistered_fn, folder_output, lab_truth_fn)
+function LAB_scan, LAB_truth_reg_trimmed = register_controlpoint_show (original_fn, unregistered_fn, folder_output, lab_truth_fn)
 
 %%
 % load two images

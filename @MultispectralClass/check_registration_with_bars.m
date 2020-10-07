@@ -74,7 +74,7 @@ end
 
 %% save data
 
-saveas(gcf,'finding registration.png')
+saveas(gcf,[folder '/finding registration.png'])
 
 
 end
@@ -104,9 +104,9 @@ winwidth = 10;
 winheight = round(winwidth * size(im1,1) / size(im1,2));
 
 % new figure
-figure('Units','inches',...
-    'Position',[1 1 winwidth winheight],...
-    'PaperPositionMode','auto');
+figure%('Units','inches',...
+    %'Position',[1 1 winwidth winheight],...
+    %'PaperPositionMode','auto');
 
 set(gca,...
     'Units','normalized',...
