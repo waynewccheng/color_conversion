@@ -3,6 +3,22 @@ classdef MultispectralClass
     
     %% Multispectral Imaging System processing
     % 11-24-2018 Thanksgiving
+    %
+    % 09-20-2020 ACL -- Modified version of MultispectralClass to register images
+    % from different scanners and compute dE between them
+    %
+    % This version of the code assumes that, for a given sample, you have
+    % transmittance, LAB, XYZ, and RGB data output by Paul's HIMS code and
+    % have a WSI image of the same sample from different scanners.
+    %
+    % General Workflow for a given Scanner_Name:
+    % 1) Modify definitions in conversion function (Lines 1029-1041) as needed
+    % 2) Run MultispectralClass.conversion in command window to create folders & convert files 
+    % 3) Manually save an image of the ROI from the scanner as "scan.tif" in the "Scanner_Name/200 roi" folder location
+    % 4) Use the Registration Estimator App to register your truth image with your ROI image from the scanner
+    % 5) Save the output 'movingReg' file as 'matlab_registration' in the "Scanner_Name/400 sRGB" folder
+    % 6) Modify definitions in register_scanner_tissue function (Lines 1013-1024) as needed
+    % 7) Run MultispectralClass.register_scanner_tissue in command window
     
     properties
     end
@@ -966,7 +982,7 @@ classdef MultispectralClass
         %% Function to show the registration and check the registration between two images
         %
         %
-        function register_scanner (path_truth, path_scan, pathname,scannername)
+        function register_scanner (path_truth, path_scan, pathname, scannername)
             filepath_truth = [path_truth '/900 sRGB/truth.tif'];
             filepath_truth_lab = [path_truth '/520 CIELAB'];
             filepath_roi = [path_scan '/200 roi/scan.tif'];
@@ -997,15 +1013,33 @@ classdef MultispectralClass
         function register_scanner_tissue
             
             datasetname = 'E:/DigitalPathology/GitHub_Repos/'
-            pathname = [datasetname 'Camelyon_T11_11969_Tag2']
-            scannername = 'hamamatsu';
+            pathname = [datasetname 'Camelyon16_T11-14419_Tag1']
+            scannername = 'zeiss';
             
             path_truth = [pathname '/truth']
             path_scan = [pathname '/' scannername]
             
-            MultispectralClass.register_scanner(path_truth,path_scan,pathrename,scannername)            
+            MultispectralClass.register_scanner(path_truth,path_scan,pathname,scannername)            
 
         end
+        
+        
+        %% Convert Files output from Paul's HIMS structure to MultispectralClass structure
+        
+        function conversion
+            % Name the necessary information
+            path = ('E:/DigitalPathology/GitHub_Repos/');
+            path_processed = ('E:/DigitalPathology/HIMS_Data/ProcessedData/');
+            Sample_Name = ('Camelyon16_T11-14419_Tag1');
+            Date = ('091020');
+            Scanner1 = ('hamamatsu');
+            Scanner2 = ('zeiss');
+            
+            % Create directories, convert data
+            fileconverter(path,path_processed,Sample_Name,Scanner1,Scanner2,Date)
+            
+        end
+            
         
         % placeholder
         % does not work because of workspace

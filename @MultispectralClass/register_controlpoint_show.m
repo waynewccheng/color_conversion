@@ -1,3 +1,6 @@
+% 09-30-2020 (ACL)
+% modified visualization to eliminate figure positioning (Line 127)
+% this line was making figure visualization odd & challenging
 % 11-17-2018
 % changed to 6 subplots
 % 11-16-2018
@@ -104,12 +107,7 @@ registered_cp_corr_trimmed = registered_cp_corr(P_y_min:P_y_max,P_x_min:P_x_max,
 
 %% LAB of truth
 
-% load the truth LAB data 
-% load([lab_truth_fn '/LAB.mat'],'LAB_array');
-% y = 676;
-% x = 844;
-% 
-% LAB = reshape(LAB_array,y,x,3);
+% load the truth LAB data
 load([lab_truth_fn '/LAB.mat'],'LAB')
 
 % use the same transform to process the LAB data

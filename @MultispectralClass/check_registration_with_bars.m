@@ -1,3 +1,7 @@
+% 09-30-20 (ACL)
+% Modified figure positioning (Line 107)
+% This line was making visualization of the figure odd
+
 % To answer Craig's comments about pixel-level registration
 
 function check_registration_with_bars (folder)
