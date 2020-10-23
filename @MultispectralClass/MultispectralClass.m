@@ -1013,8 +1013,8 @@ classdef MultispectralClass
         function register_scanner_tissue
             
             datasetname = 'E:/DigitalPathology/GitHub_Repos/'
-            pathname = [datasetname 'Camelyon16_T11-14419_Tag1']
-            scannername = 'zeiss';
+            pathname = [datasetname 'BiomaxOrgan10_Brain_H10']
+            scannername = 'hamamatsu';
             
             path_truth = [pathname '/truth']
             path_scan = [pathname '/' scannername]
@@ -1030,13 +1030,14 @@ classdef MultispectralClass
             % Name the necessary information
             path = ('E:/DigitalPathology/GitHub_Repos/');
             path_processed = ('E:/DigitalPathology/HIMS_Data/ProcessedData/');
-            Sample_Name = ('Camelyon16_T11-14419_Tag1');
-            Date = ('091020');
+            Sample_Name = ('BiomaxOrgan10_UterineCervix_B10');
+            Date = ('Truth');
             Scanner1 = ('hamamatsu');
             Scanner2 = ('zeiss');
+            Scanner3 = ('leica');
             
             % Create directories, convert data
-            fileconverter(path,path_processed,Sample_Name,Scanner1,Scanner2,Date)
+            fileconverter(path,path_processed,Sample_Name,Scanner1,Scanner2,Scanner3,Date)
             
         end
             

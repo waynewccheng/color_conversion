@@ -13,7 +13,7 @@
 % Scanner 2 -- the name of the other scanner that is being compared(lowercase)
 % Date -- the date the HIMS data was collected (in the form MMDDYY)
 
-function fileconverter(path, path_processed, Sample_Name, Scanner1, Scanner2, Date)
+function fileconverter(path, path_processed, Sample_Name, Scanner1, Scanner2, Scanner3, Date)
 
 % Make truth directories for MultispectralClass 
 mkdir([path '/' Sample_Name '/truth/220 transmittance']);
@@ -29,6 +29,10 @@ mkdir([path '/' Sample_Name '/' Scanner1 '/400 sRGB']);
 mkdir([path '/' Sample_Name '/' Scanner2 '/100 wsi']);
 mkdir([path '/' Sample_Name '/' Scanner2 '/200 roi']);
 mkdir([path '/' Sample_Name '/' Scanner2 '/400 sRGB']);
+
+mkdir([path '/' Sample_Name '/' Scanner3 '/100 wsi']);
+mkdir([path '/' Sample_Name '/' Scanner3 '/200 roi']);
+mkdir([path '/' Sample_Name '/' Scanner3 '/400 sRGB']);
 
 % Load Transmittance, XYZ, LAB, RGB, and truth image data output by Paul's HIMS code
 load([path_processed '/' Date '/' Sample_Name '/Transmittance/trans_mean_camera']);
