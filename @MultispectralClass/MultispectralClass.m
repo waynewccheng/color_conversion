@@ -12,6 +12,12 @@ classdef MultispectralClass
     % have a WSI image of the same sample from different scanners.
     %
     % General Workflow for a given Scanner_Name:
+    %
+    % **If all the files are in place and you just need to run the code, go to step 6.
+    % **If files are in place but images have not been registered, go to step 4.
+    % **If you have data from Paul's HIMS code and now need to analyze it for color 
+    % conversions and dE calculations, start at step 1.
+    %
     % 1) Modify definitions in conversion function (Lines 1029-1041) as needed
     % 2) Run MultispectralClass.conversion in command window to create folders & convert files 
     % 3) Manually save an image of the ROI from the scanner as "scan.tif" in the "Scanner_Name/200 roi" folder location
